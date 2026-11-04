@@ -1,0 +1,1040 @@
+/* =============================================================================
+   ESTILO GLOBAL DO PROJETO DESLOCA
+   =============================================================================
+   As cores vêm do logo oficial da equipe:
+   - Preto quase puro (#1D1D1B) = texto e elementos estruturais
+   - Bege (#C9A882) = cor de destaque (o pontinho do logo)
+   - Creme (#FAF8F4) = fundo do site
+   ========================================================================== */
+:root {
+  --preto: #1d1d1b; 
+  --bege: #c9a882; 
+  --bege-claro: #eadfd2; 
+  --creme: #faf8f4; 
+  --branco: #ffffff;
+  --cinza: #6b6863; 
+  --cinza-claro: #e8e4de; 
+  --verde: #4f7a5a; 
+  --amarelo: #c99a2e; 
+  --vermelho: #b3453a; 
+  --sombra: 0 6px 24px rgba(29, 29, 27, 0.08); 
+  --raio: 16px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Manrope', system-ui, sans-serif;
+  background: var(--creme);
+  color: var(--preto);
+  line-height: 1.5;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid var(--bege);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   CABEÇALHO (topo do site)
+   --------------------------------------------------------------------------- */
+.cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 28px;
+  background: var(--branco);
+  border-bottom: 1px solid var(--cinza-claro);
+  position: sticky; /* Fica fixo no topo ao rolar a página */
+  top: 0;
+  z-index: 1000;
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 1.3rem;
+  letter-spacing: -0.5px;
+}
+
+.marca-logo {
+  width: 34px;
+  height: 34px;
+  object-fit: cover; 
+  border-radius: 8px;
+}
+
+
+.nav {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.nav a {
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--cinza);
+  transition: background 0.2s, color 0.2s;
+}
+
+.nav a:hover {
+  background: var(--creme);
+  color: var(--preto);
+}
+
+
+.nav a.ativo {
+  background: var(--preto);
+  color: var(--branco);
+}
+
+/* ---------------------------------------------------------------------------
+   LAYOUT PRINCIPAL
+   --------------------------------------------------------------------------- */
+.pagina {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+
+.titulo-pagina {
+  font-size: clamp(1.7rem, 4vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-bottom: 6px;
+}
+
+.subtitulo {
+  color: var(--cinza);
+  max-width: 60ch;
+  margin-bottom: 28px;
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.cartao {
+  background: var(--branco);
+  border: 1px solid var(--cinza-claro);
+  border-radius: var(--raio);
+  padding: 20px;
+  box-shadow: var(--sombra);
+  transition: transform 0.15s;
+}
+
+.cartao:hover {
+  transform: translateY(-3px);
+}
+
+.cartao h3 {
+  font-size: 1.05rem;
+  margin-bottom: 6px;
+}
+
+.cartao p {
+  font-size: 0.9rem;
+  color: var(--cinza);
+}
+
+/* ---------------------------------------------------------------------------
+   BOTÕES
+   --------------------------------------------------------------------------- */
+.botao {
+  display: inline-block;
+  background: var(--preto);
+  color: var(--branco);
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.botao:hover {
+  opacity: 0.85;
+}
+
+.botao.secundario {
+  background: var(--creme);
+  color: var(--preto);
+  border: 1px solid var(--cinza-claro);
+}
+
+/* ---------------------------------------------------------------------------
+   ÁREA DO MAPA
+   --------------------------------------------------------------------------- */
+.mapa {
+  height: 460px;
+  width: 100%;
+  border-radius: var(--raio);
+  border: 1px solid var(--cinza-claro);
+  z-index: 1; 
+}
+
+/* ---------------------------------------------------------------------------
+   PÁGINA DO MAPA EM TELA CHEIA
+   --------------------------------------------------------------------------- */
+.tela-mapa {
+  position: relative; 
+  height: calc(100vh - 62px); 
+  min-height: 480px;
+  overflow: hidden;
+}
+
+
+.mapa--tela-cheia {
+  height: 100%;
+  border-radius: 0;
+  border: none;
+}
+
+.painel-filtros {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  bottom: 16px; 
+  width: 330px;
+  max-width: calc(100% - 32px);
+
+  background: rgba(255, 255, 255, 0.97); 
+  backdrop-filter: blur(8px); 
+  border: 1px solid var(--cinza-claro);
+  border-radius: calc(var(--raio) + 4px);
+  box-shadow: 0 12px 40px rgba(29, 29, 27, 0.22); 
+  padding: 18px;
+
+  
+  overflow-y: auto;
+  z-index: 1000; 
+}
+
+.painel-titulo {
+  font-size: 1rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.lista-filtros {
+  list-style: none;
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filtro-linha {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--branco);
+  border: 1px solid var(--cinza-claro);
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.filtro-linha:hover {
+  background: var(--creme);
+}
+
+.filtro-linha.marcada {
+  border-color: var(--bege);
+  background: #fdfbf8;
+}
+
+.filtro-linha .caixa {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border: 1.5px solid var(--cinza-claro);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--branco);
+}
+
+.filtro-linha.marcada .caixa {
+  background: var(--preto);
+  border-color: var(--preto);
+}
+
+.filtro-linha .icone-filtro {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--creme);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filtro-linha .texto-filtro {
+  flex: 1; 
+  display: flex;
+  flex-direction: column;
+  min-width: 0; 
+}
+
+.filtro-linha .texto-filtro strong {
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; 
+}
+
+.filtro-linha .texto-filtro small {
+  font-size: 0.75rem;
+  color: var(--cinza);
+}
+
+.filtro-linha .cor-linha {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.lista-filtros .vazio {
+  font-size: 0.85rem;
+  color: var(--cinza);
+  padding: 8px 2px;
+}
+
+.filtro-todas {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  margin-top: 14px;
+  background: var(--creme);
+  border: 1.5px solid var(--cinza-claro);
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.filtro-todas:hover {
+  background: var(--bege-claro);
+}
+
+/* Estado marcado: destaque na borda e fundo */
+.filtro-todas.marcada {
+  border-color: var(--bege);
+  background: #fdfbf8;
+}
+
+/* Caixinha de seleção (quadrado com o "✓") */
+.filtro-todas .caixa {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border: 1.5px solid var(--cinza-claro);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--branco);
+}
+
+.filtro-todas.marcada .caixa {
+  background: var(--preto);
+  border-color: var(--preto);
+}
+
+.filtro-todas .icone-filtro {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--branco);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  order: 2; 
+}
+
+.filtro-todas .texto-filtro {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.filtro-todas .texto-filtro strong {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.filtro-todas .texto-filtro small {
+  font-size: 0.75rem;
+  color: var(--cinza);
+}
+
+/* ---------------------------------------------------------------------------
+   AVISO DO PONTO MAIS PRÓXIMO (canto inferior esquerdo do mapa)
+   --------------------------------------------------------------------------- */
+.aviso-proximo {
+  position: absolute;
+  left: 16px;
+  bottom: 24px;
+  z-index: 1000; 
+
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+
+  max-width: 380px;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--cinza-claro);
+  border-radius: var(--raio);
+  box-shadow: 0 12px 40px rgba(29, 29, 27, 0.22);
+  padding: 14px 16px;
+}
+
+.aviso-icone {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.aviso-proximo strong {
+  font-size: 0.9rem;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.aviso-proximo p {
+  font-size: 0.8rem;
+  color: var(--cinza);
+  line-height: 1.45;
+}
+
+.aviso-proximo .aviso-extra {
+  font-size: 0.75rem;
+  margin-top: 3px;
+}
+
+.aviso-proximo.aviso-erro {
+  background: rgba(253, 244, 242, 0.97);
+  border-color: #e8c4be;
+}
+
+.divisor {
+  border: none;
+  border-top: 1px solid var(--cinza-claro);
+  margin: 16px 0;
+}
+
+.filtro-alertas {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filtro-alertas input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--preto); 
+}
+
+.legenda-painel {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  font-size: 0.75rem;
+  color: var(--cinza);
+}
+
+.legenda-painel span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legenda {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  font-size: 0.85rem;
+  color: var(--cinza);
+}
+
+.legenda span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ponto-legend {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* ---------------------------------------------------------------------------
+   BADGES (etiquetas de status)
+   --------------------------------------------------------------------------- */
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.badge.operacao {
+  background: #e6efe8;
+  color: var(--verde);
+}
+
+.badge.fora {
+  background: #f7e7e5;
+  color: var(--vermelho);
+}
+
+.badge.medio {
+  background: #f7efd9;
+  color: var(--amarelo);
+}
+
+.badge.vazio {
+  background: #e6efe8;
+  color: var(--verde);
+}
+
+.badge.cheio {
+  background: #f7e7e5;
+  color: var(--vermelho);
+}
+
+/* ---------------------------------------------------------------------------
+   FORMULÁRIOS (busca e denúncias)
+   --------------------------------------------------------------------------- */
+.campo {
+  width: 100%;
+  padding: 13px 18px;
+  border: 1px solid var(--cinza-claro);
+  border-radius: 999px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: var(--branco);
+}
+
+.campo:focus {
+  border-color: var(--bege);
+}
+
+.rotulo {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin: 14px 0 6px;
+}
+
+textarea.campo {
+  border-radius: var(--raio);
+  min-height: 110px;
+  resize: vertical;
+}
+
+.aviso-sucesso {
+  background: #e6efe8;
+  color: var(--verde);
+  padding: 14px 18px;
+  border-radius: var(--raio);
+  font-weight: 600;
+  margin-top: 16px;
+}
+
+/* ---------------------------------------------------------------------------
+   PÁGINA INICIAL - destaque e atalhos
+   --------------------------------------------------------------------------- */
+.destaque {
+  background: var(--preto);
+  color: var(--branco);
+  border-radius: calc(var(--raio) + 8px);
+  padding: 44px 36px;
+  margin-bottom: 32px;
+}
+
+.destaque h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  line-height: 1.1;
+  max-width: 16ch;
+}
+
+.destaque p {
+  color: #b8b5b0;
+  margin: 14px 0 24px;
+  max-width: 52ch;
+}
+
+.destaque .botao {
+  background: var(--bege);
+  color: var(--preto);
+}
+
+.atalho-icone {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--bege-claro);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  margin-bottom: 12px;
+}
+
+/* ---------------------------------------------------------------------------
+   RODAPÉ
+   --------------------------------------------------------------------------- */
+.rodape {
+  background: var(--preto);
+  color: #b8b5b0;
+  text-align: center;
+  padding: 28px 20px;
+  font-size: 0.85rem;
+}
+
+.rodape strong {
+  color: var(--branco);
+}
+
+/* ---------------------------------------------------------------------------
+   RESPONSIVIDADE (celular)
+   --------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+  .cabecalho {
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .destaque {
+    padding: 30px 22px;
+  }
+
+  .mapa {
+    height: 340px;
+  }
+
+  .tela-mapa {
+    height: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mapa--tela-cheia {
+    height: 55vh; 
+  }
+
+  .painel-filtros {
+    position: static; 
+    width: 100%;
+    max-width: 100%;
+    border-radius: 0;
+    box-shadow: none;
+    max-height: none;
+  }
+
+  .aviso-proximo {
+    position: static;
+    max-width: 100%;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   ACESSIBILIDADE URBANA — MOVIDA
+   --------------------------------------------------------------------------- */
+.acessibilidade-pagina {
+  max-width: 1160px;
+}
+
+.acessibilidade-introducao {
+  margin-bottom: 38px;
+}
+
+.acessibilidade-etiqueta {
+  display: inline-block;
+  margin-bottom: 10px;
+  color: var(--verde);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.acessibilidade-secao-cabecalho {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.acessibilidade-secao-cabecalho h2 {
+  margin-bottom: 5px;
+  font-size: clamp(1.2rem, 2.5vw, 1.55rem);
+  letter-spacing: -0.5px;
+}
+
+.acessibilidade-secao-cabecalho p {
+  color: var(--cinza);
+  font-size: 0.9rem;
+}
+
+.acessibilidade-recursos {
+  margin-bottom: 44px;
+}
+
+.acessibilidade-recursos-grade {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.acessibilidade-recurso {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  min-height: 112px;
+  padding: 20px;
+  background: var(--branco);
+  border: 1px solid var(--cinza-claro);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+}
+
+.acessibilidade-recurso-icone,
+.acessibilidade-rota-icone,
+.acessibilidade-contribuir-icone {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  background: var(--bege-claro);
+  font-size: 1.35rem;
+}
+
+.acessibilidade-recurso h3 {
+  margin: 1px 0 5px;
+  font-size: 1rem;
+}
+
+.acessibilidade-recurso p {
+  color: var(--cinza);
+  font-size: 0.86rem;
+  line-height: 1.6;
+}
+
+.acessibilidade-rotas {
+  margin-bottom: 42px;
+}
+
+.acessibilidade-contagem {
+  flex: 0 0 auto;
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: var(--bege-claro);
+  color: var(--preto);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.acessibilidade-busca-filtros {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.acessibilidade-campo-busca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 15px;
+  background: var(--branco);
+  border: 1px solid var(--cinza-claro);
+  border-radius: 12px;
+  color: var(--cinza);
+  font-size: 1.35rem;
+}
+
+.acessibilidade-campo-busca input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--preto);
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.acessibilidade-campo-busca:focus-within {
+  outline: 3px solid var(--bege);
+  outline-offset: 2px;
+}
+
+.acessibilidade-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.acessibilidade-filtro {
+  min-height: 38px;
+  padding: 8px 13px;
+  border: 1px solid var(--cinza-claro);
+  border-radius: 999px;
+  background: var(--branco);
+  color: var(--cinza);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.acessibilidade-filtro:hover,
+.acessibilidade-filtro.selecionado {
+  border-color: var(--preto);
+  background: var(--preto);
+  color: var(--branco);
+}
+
+.acessibilidade-rotas-grade {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.acessibilidade-rota {
+  padding: 21px;
+  border: 1px solid var(--cinza-claro);
+  border-radius: var(--raio);
+  background: var(--branco);
+  box-shadow: var(--sombra);
+}
+
+.acessibilidade-rota-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 17px;
+}
+
+.acessibilidade-rota-icone {
+  width: 38px;
+  height: 38px;
+  font-size: 1.2rem;
+}
+
+.acessibilidade-status {
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #f4eee6;
+  color: #735d43;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.acessibilidade-rota h3 {
+  font-size: 1rem;
+}
+
+.acessibilidade-rota-destino {
+  margin: 3px 0 12px;
+  color: var(--verde);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.acessibilidade-rota p {
+  min-height: 48px;
+  color: var(--cinza);
+  font-size: 0.87rem;
+  line-height: 1.65;
+}
+
+.acessibilidade-rota-rodape {
+  margin-top: 16px;
+  padding-top: 13px;
+  border-top: 1px solid var(--cinza-claro);
+  color: var(--cinza);
+  font-size: 0.8rem;
+}
+
+.acessibilidade-rota-rodape strong {
+  color: var(--preto);
+}
+
+.acessibilidade-aviso {
+  margin-top: 17px;
+  padding: 13px 15px;
+  border-left: 3px solid var(--bege);
+  border-radius: 5px;
+  background: #f3eee7;
+  color: #665d52;
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.acessibilidade-sem-resultados {
+  display: grid;
+  justify-items: center;
+  gap: 9px;
+  padding: 38px 20px;
+  border: 1px dashed var(--cinza-claro);
+  border-radius: var(--raio);
+  text-align: center;
+}
+
+.acessibilidade-sem-resultados > span {
+  color: var(--cinza);
+  font-size: 2rem;
+}
+
+.acessibilidade-sem-resultados p {
+  margin-bottom: 8px;
+  color: var(--cinza);
+  font-size: 0.88rem;
+}
+
+.acessibilidade-contribuir {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  padding: 22px;
+  border: 1px solid var(--cinza-claro);
+  border-radius: var(--raio);
+  background: var(--bege-claro);
+}
+
+.acessibilidade-contribuir-icone {
+  background: var(--branco);
+  color: var(--preto);
+  font-size: 1.7rem;
+}
+
+.acessibilidade-contribuir > div:nth-child(2) {
+  flex: 1;
+}
+
+.acessibilidade-contribuir h2 {
+  margin-bottom: 4px;
+  font-size: 1rem;
+}
+
+.acessibilidade-contribuir p {
+  color: var(--cinza);
+  font-size: 0.83rem;
+  line-height: 1.6;
+}
+
+.acessibilidade-contribuir-botao {
+  flex: 0 0 auto;
+  text-align: center;
+}
+
+@media (max-width: 700px) {
+  .acessibilidade-recursos-grade,
+  .acessibilidade-rotas-grade {
+    grid-template-columns: 1fr;
+  }
+
+  .acessibilidade-secao-cabecalho {
+    align-items: flex-start;
+  }
+
+  .acessibilidade-contribuir {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .acessibilidade-contribuir > div:nth-child(2) {
+    flex-basis: calc(100% - 65px);
+  }
+
+  .acessibilidade-contribuir-botao {
+    width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .acessibilidade-pagina {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .acessibilidade-recurso,
+  .acessibilidade-rota {
+    padding: 16px;
+  }
+
+  .acessibilidade-filtros {
+    gap: 7px;
+  }
+
+  .acessibilidade-filtro {
+    font-size: 0.74rem;
+  }
+}
