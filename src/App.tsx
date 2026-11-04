@@ -15,6 +15,7 @@ import Linhas from './paginas/Linhas'
 import Acessibilidade from './paginas/Acessibilidade'
 import Denuncias from './paginas/Denuncias'
 import Dicas from './paginas/Dicas'
+import IndiceMovida from './paginas/IndiceMovida'
 
 export default function App() {
   return (
@@ -31,6 +32,7 @@ export default function App() {
         <Route path="/acessibilidade" element={<Acessibilidade />} />
         <Route path="/denuncias" element={<Denuncias />} />
         <Route path="/dicas" element={<Dicas />} />
+        <Route path="/indice-movida" element={<IndiceMovida />} />
 
         {/* Rota coringa: qualquer endereço não listado cai no início */}
         <Route path="*" element={<Inicio />} />

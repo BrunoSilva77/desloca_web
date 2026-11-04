@@ -17,6 +17,7 @@ const LINKS = [
   { to: '/acessibilidade', nome: 'Acessibilidade' },
   { to: '/denuncias', nome: 'Denúncias' },
   { to: '/dicas', nome: 'Dicas' },
+  { to: '/indice-movida', nome: 'Índice MOVIDA' },
 ]
 
 export default function Cabecalho() {

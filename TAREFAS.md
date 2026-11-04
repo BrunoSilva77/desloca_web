@@ -51,6 +51,14 @@ git push
 - [x] **03/11** — Filtro "Todas as linhas"
 - [x] **03/11** — Logo do D no cabeçalho
 - [x] **03/11** — Localização do usuário + ponto mais próximo + tempo a pé
+- [x] **04/11** — **Diagrama de arquitetura técnica** (`docs/diagrama-arquitetura.md`
+      + `.png` para o PowerPoint, gerado por `testes/gerar_diagrama.py`)
+- [x] **04/11** — **Merge do trabalho da equipe** (histórias separadas no Git,
+      juntadas com `--allow-unrelated-histories`)
+- [x] **04/11** — Página **Índice MOVIDA** (novo painel de indicadores, da equipe)
+- [x] **04/11** — **Acessibilidade** reescrita com busca, filtros e rotas (da equipe)
+- [x] **04/11** — CSS unido: **comentários em português mantidos** + estilos novos
+      da equipe (785 linhas) — zero conflito de código, só de comentário
 
 ---
 
@@ -60,10 +68,12 @@ git push
 
 - [x] **Commit inicial no GitHub** — branch `feature/prototipo-navegavel` enviada em 03/11
 - [ ] **README inicial** já está feito, mas precisa dos **badges** e print das telas
-- [ ] **Diagrama de arquitetura técnica** (tarefa de 05/11) — desenho das camadas:
-      front-end → API → back-end → banco
+- [x] **Diagrama de arquitetura técnica** (tarefa de 05/11) — pronto em
+      `docs/diagrama-arquitetura.md` (Mermaid) e `.png` (PowerPoint)
 - [ ] **Justificativa da stack** já escrita no README, revisar com a equipe
 - [ ] **Prints das telas** para colocar no README (estão em `testes/`)
+- [ ] **Levar o merge para a `main`** — o trabalho está na
+      `feature/prototipo-navegavel`; a equipe trabalha na `main`
 
 ### 🟡 Importante (funcionalidade e qualidade)
 
@@ -73,6 +83,8 @@ git push
 - [ ] **Busca por origem/destino** (estilo Uber: "de → para")
 - [ ] **Responsividade no celular** — testar todas as telas em 375px
 - [ ] **Testar localização no celular real** (o `getCurrentPosition` é diferente)
+- [ ] **Comentários nos estilos novos** da Acessibilidade/Índice MOVIDA — a equipe
+      deixou só o cabeçalho de seção; falta comentar propriedade por propriedade
 
 ### 🟢 Desejável (diferenciais)
 
@@ -87,6 +99,13 @@ git push
 - ~~Meu Perfil / gamificação~~
 - ~~Card de contribuição ambiental (CO₂)~~
 - ~~Ciclovias~~
+- ~~**Login / cadastro de usuário**~~ — o protótipo não tem autenticação
+
+### 🧹 Pendência de limpeza (decorrente do corte do login)
+
+- [ ] **Remover a tabela `usuarios`** do `banco/desloca.sql` (tem `senha_hash`)
+- [ ] **Tirar JWT e bcrypt** do `FERRAMENTAS.md` — senão alguém pergunta "e esse
+      JWT aqui?" na apresentação e a equipe fica sem resposta
 
 ---
 
