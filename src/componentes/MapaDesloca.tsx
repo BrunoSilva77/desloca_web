@@ -18,6 +18,7 @@ type Props = {
   alertasCoords?: { coords: [number, number]; titulo: string }[] // Marcadores de alerta
   telaCheia?: boolean // Se true, o mapa ocupa toda a área disponível
   minhaPosicao?: [number, number] | null // Localização atual do usuário
+  onLinhaClick?: (linha: Linha) => void // Função chamada quando o usuário clica na linha
 }
 
 // Cria o ícone de ônibus personalizado usando um emoji dentro de um círculo
@@ -66,6 +67,7 @@ export default function Mapa({
   alertasCoords = [],
   telaCheia = false,
   minhaPosicao = null,
+  onLinhaClick,
 }: Props) {
   // Referência para o objeto do mapa do Leaflet (para poder manipular depois)
   const mapaRef = useRef<L.Map | null>(null)
@@ -117,13 +119,18 @@ export default function Mapa({
       if (linhaAtiva && !ativa) return // Se tem linha ativa, mostra só ela
 
       // Linha do trajeto: polilinha conectando as coordenadas
-      L.polyline(linha.trajeto, {
+      const polyline = L.polyline(linha.trajeto, {
         color: linha.cor,
         weight: ativa ? 6 : 4,
         opacity: ativa ? 1 : 0.5,
         // Deixa a linha "pulsando" quando é a selecionada
         dashArray: ativa ? undefined : '8 8',
       }).addTo(camada)
+
+      // Clique na linha abre o popup de detalhes (quando o pai pede)
+      if (onLinhaClick) {
+        polyline.on('click', () => onLinhaClick(linha))
+      }
 
       // Marcadores dos pontos de parada
       linha.pontos.forEach((ponto) => {
@@ -183,7 +190,7 @@ export default function Mapa({
     if (minhaPosicao && !linhaAtiva) {
       mapaRef.current?.setView(minhaPosicao, 15)
     }
-  }, [linhaAtiva, linhas, alertasCoords, minhaPosicao])
+  }, [linhaAtiva, linhas, alertasCoords, minhaPosicao, onLinhaClick])
 
   // O que é desenhado na tela: a "caixa" onde o mapa é montado.
   // "telaCheia" aplica a classe que faz o mapa ocupar toda a área da página.

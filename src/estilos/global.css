@@ -1523,3 +1523,176 @@ textarea.campo {
     align-items: flex-start;
   }
 }
+
+/* =============================================================================
+   NOVOS COMPONENTES DA PÁGINA DO MAPA
+   ============================================================================= */
+
+/* Botões flutuantes (sino e denúncia) sobre o mapa */
+.botao-flutuante {
+  position: absolute;
+  z-index: 1000;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  background: var(--branco);
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s, background 0.15s;
+}
+
+.botao-flutuante:hover {
+  transform: scale(1.1);
+  background: var(--creme);
+}
+
+.botao-flutuante.sino {
+  top: 20px;
+  right: 20px;
+}
+
+.botao-flutuante.denuncia {
+  bottom: 20px;
+  right: 20px;
+}
+
+/* Toast de dicas e notificações */
+.toast {
+  position: fixed;
+  top: 80px;
+  right: 24px;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--preto);
+  color: var(--branco);
+  padding: 14px 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  animation: toast-in 0.3s ease;
+  max-width: 360px;
+}
+
+.toast-icone {
+  font-size: 1.2rem;
+}
+
+.toast-message {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+@keyframes toast-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Popup de detalhes da linha e popup de denúncia */
+.popup-detalhes {
+  position: absolute;
+  z-index: 1500;
+  background: var(--branco);
+  border: 1px solid var(--cinza-claro);
+  border-radius: var(--raio);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  min-width: 280px;
+  max-width: 360px;
+}
+
+.popup-fechar {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--cinza);
+}
+
+.popup-fechar:hover {
+  color: var(--preto);
+}
+
+.popup-cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.popup-cor {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.popup-conteudo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.popup-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.popup-item span {
+  color: var(--cinza);
+}
+
+.popup-item strong {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+/* Botões de tipo no popup de denúncia */
+.popup-tipos {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.popup-tipos button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px;
+  border: 1px solid var(--cinza-claro);
+  border-radius: 8px;
+  background: var(--branco);
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.popup-tipos button.selecionado {
+  border-color: var(--bege);
+  background: var(--bege-claro);
+}
+
+/* Popup-ícone usado na lista de tipos de denúncia */
+.popup-icone {
+  font-size: 1.4rem;
+}
+
+/* Ajuste para o popup de denúncia ser um pouco mais largo */
+.popup-detalhes.popup-detalhes {
+  min-width: 300px;
+  max-width: 400px;
+}

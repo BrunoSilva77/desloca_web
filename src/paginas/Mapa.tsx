@@ -8,12 +8,18 @@
 //   1. Filtro de linhas (com opção "Todas as linhas")
 //   2. Localização do usuário e cálculo do ponto de ônibus mais próximo
 //   3. Alertas de trânsito ligáveis/desligáveis
+//   4. Popup de detalhes ao clicar na linha do mapa
+//   5. Botão de notificações (sino) com dicas em toast
+//   6. Botão de denúncia com formulário
 // =============================================================================
 
 import { useState, useEffect, useMemo } from 'react'
 import MapaDesloca from '../componentes/MapaDesloca'
 import { LINHAS, ALERTAS, type Linha } from '../dados/linhas'
 import { distanciaKm, tempoCaminhadaMin, formatarDistancia } from '../utilidades/geo'
+import Toast from '../componentes/Toast'
+import PopupDetalhesLinha from '../componentes/PopupDetalhesLinha'
+import PopupDenuncia from '../componentes/PopupDenuncia'
 
 // Ícone SVG de ônibus usado nos filtros (desenhado à mão para não depender
 // de emoji, que muda de desenho em cada sistema operacional)
@@ -24,21 +30,24 @@ function IconeOnibus({ cor }: { cor: string }) {
       width="20"
       height="20"
       fill="none"
-      stroke={cor}
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Carroceria do ônibus */}
-      <rect x="4" y="3" width="16" height="14" rx="3" />
-      {/* Faixa das janelas */}
-      <path d="M4 10h16" />
-      {/* Farol e para-choque */}
-      <path d="M7 17v2M17 17v2" />
-      {/* Rodas */}
-      <circle cx="8" cy="14" r="1" fill={cor} stroke="none" />
-      <circle cx="16" cy="14" r="1" fill={cor} stroke="none" />
+      <path
+        d="M4 15V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V15"
+        stroke={cor}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M6 15V7C6 5.34315 7.34315 4 9 4H15C16.6569 4 18 5.34315 18 7V15"
+        stroke={cor}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="8" cy="19" r="1" fill={cor} />
+      <circle cx="16" cy="19" r="1" fill={cor} />
     </svg>
   )
 }
@@ -56,6 +65,18 @@ export default function Mapa() {
   // Localização do usuário (null enquanto não autoriza ou ainda não chegou)
   const [minhaPosicao, setMinhaPosicao] = useState<[number, number] | null>(null)
   const [erroLocalizacao, setErroLocalizacao] = useState(false)
+
+  // NOVO: estado para o popup de detalhes da linha
+  const [linhaDetalhe, setLinhaDetalhe] = useState<Linha | null>(null)
+
+  // NOVO: estado para o popup de denúncia
+  const [mostrarDenuncia, setMostrarDenuncia] = useState(false)
+
+  // NOVO: estado para o toast de dicas
+  const [toast, setToast] = useState<string | null>(null)
+
+  // NOVO: estado para notificações (sino)
+  const [mostrarNotificacoes, setMostrarNotificacoes] = useState(false)
 
   // -----------------------------------------------------------------------------
   // Pede a localização do usuário ao abrir a página.
@@ -75,7 +96,7 @@ export default function Mapa() {
       () => setErroLocalizacao(true),
       { enableHighAccuracy: true, timeout: 8000 }
     )
-  }, []) // [] = executa apenas uma vez, ao montar a tela
+  }, [])
 
   // -----------------------------------------------------------------------------
   // Calcula os pontos de ônibus mais próximos da localização do usuário.
@@ -136,7 +157,7 @@ export default function Mapa() {
     )
   }
 
-  // Marca ou desmarca todas as linhas de uma vez
+  // Marca ou desliga todas as linhas de uma vez
   function alternarTodas() {
     // Se já estão todas marcadas (lista vazia), marca apenas a primeira.
     // Se tem alguma marcada, limpa tudo (volta a mostrar todas).
@@ -151,6 +172,25 @@ export default function Mapa() {
     ? ALERTAS.map((a) => ({ coords: a.coords, titulo: a.titulo }))
     : []
 
+  // Handlers para os popups
+  function handleLinhaClick(linha: Linha) {
+    setLinhaDetalhe(linha)
+  }
+
+  function handleDenunciaEnviada(tipo: string, local: string, descricao: string) {
+    console.log('Denúncia enviada:', { tipo, local, descricao })
+    setToast('✓ Denúncia registrada!')
+    setMostrarDenuncia(false)
+  }
+
+  // Toast de dica automática após 3 segundos
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setToast('💡 Dica: use o filtro "Todas as linhas" para ver todas as opções.')
+    }, 3000)
+    return () => clearTimeout(timer)
+  }, [])
+
   return (
     <div className="tela-mapa">
       {/* Mapa ocupando toda a área disponível da tela */}
@@ -160,7 +200,26 @@ export default function Mapa() {
         alertasCoords={alertasCoords}
         telaCheia
         minhaPosicao={minhaPosicao}
+        onLinhaClick={handleLinhaClick}
       />
+
+      {/* Botão de sino (notificações) - canto superior direito */}
+      <button
+        className="botao-flutuante sino"
+        onClick={() => setMostrarNotificacoes(!mostrarNotificacoes)}
+        aria-label="Notificações"
+      >
+        🔔
+      </button>
+
+      {/* Botão de denúncia - canto inferior direito */}
+      <button
+        className="botao-flutuante denuncia"
+        onClick={() => setMostrarDenuncia(!mostrarDenuncia)}
+        aria-label="Reportar problema"
+      >
+        ⚠️
+      </button>
 
       {/* Aviso flutuante com o ponto mais próximo (canto inferior esquerdo) */}
       {pontoMaisProximo && (
@@ -207,7 +266,7 @@ export default function Mapa() {
           type="search"
           placeholder="Buscar linha..."
           value={busca}
-          onChange={(e) => setBusca(e.target.value)} // Atualiza a busca a cada tecla
+          onChange={(e) => setBusca(e.target.value)}
           aria-label="Buscar linha"
         />
 
@@ -309,6 +368,31 @@ export default function Mapa() {
           </span>
         </div>
       </aside>
+
+      {/* Popup de detalhes da linha - sobre o mapa */}
+      {linhaDetalhe && (
+        <PopupDetalhesLinha
+          linha={linhaDetalhe}
+          onClose={() => setLinhaDetalhe(null)}
+        />
+      )}
+
+      {/* Popup de denúncia - sobre o mapa */}
+      {mostrarDenuncia && (
+        <PopupDenuncia
+          onClose={() => setMostrarDenuncia(false)}
+          onEnviar={handleDenunciaEnviada}
+        />
+      )}
+
+      {/* Toast de dicas/notificações */}
+      {toast && (
+        <Toast
+          message={toast}
+          duration={5000}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   )
 }
