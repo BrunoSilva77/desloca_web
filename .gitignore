@@ -1,0 +1,40 @@
+# =============================================================================
+# ARQUIVO .GITIGNORE
+# =============================================================================
+# Lista de arquivos e pastas que o Git NÃO deve guardar no repositório.
+# Isso evita subir código gerado automaticamente (peso e bagunça).
+# =============================================================================
+
+# Dependências baixadas pelo npm (recriadas com "npm install")
+node_modules/
+
+# Pasta de build (resultado do "npm run build")
+dist/
+dist-ssr/
+
+# Cache do Vite (pode causar bugs se for versionado)
+.vite/
+
+# Arquivos de editor e sistema operacional
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Arquivos gerados automaticamente pelo TypeScript (build intermediário)
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+
+# Variáveis de ambiente (senhas, chaves) — NUNCA subir
+.env
+.env.local
+.env.*.local
+
+# Pasta de uploads: documentos originais da equipe (grandes, ficam locais)
+uploads/

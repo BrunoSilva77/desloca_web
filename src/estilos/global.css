@@ -1,0 +1,740 @@
+/* =============================================================================
+   ESTILO GLOBAL DO PROJETO DESLOCA
+   =============================================================================
+   As cores vêm do logo oficial da equipe:
+   - Preto quase puro (#1D1D1B) = texto e elementos estruturais
+   - Bege (#C9A882) = cor de destaque (o pontinho do logo)
+   - Creme (#FAF8F4) = fundo do site
+   ========================================================================== */
+
+/* Variáveis de design: valores reutilizados em todo o projeto.
+   Para mudar uma cor do site inteiro, basta alterar aqui. */
+:root {
+  --preto: #1d1d1b; /* Cor principal (texto e botões) */
+  --bege: #c9a882; /* Cor de destaque */
+  --bege-claro: #eadfd2; /* Bege mais suave para fundos */
+  --creme: #faf8f4; /* Fundo padrão */
+  --branco: #ffffff; /* Cartões e painéis */
+  --cinza: #6b6863; /* Textos secundários */
+  --cinza-claro: #e8e4de; /* Bordes e divisórias */
+  --verde: #4f7a5a; /* Status: livre / operação normal */
+  --amarelo: #c99a2e; /* Status: movimento médio */
+  --vermelho: #b3453a; /* Status: cheio / atenção */
+  --sombra: 0 6px 24px rgba(29, 29, 27, 0.08); /* Sombra dos cartões */
+  --raio: 16px; /* Arredondamento padrão dos elementos */
+}
+
+/* Reset: zera margens/padding padrão do navegador para termos controle total */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Fonte e fundo padrão de todas as páginas */
+body {
+  font-family: 'Manrope', system-ui, sans-serif;
+  background: var(--creme);
+  color: var(--preto);
+  line-height: 1.5;
+}
+
+/* Deixa links sem sublinhado por padrão */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Estilo do foco por teclado (acessibilidade): quem navega com Tab vê
+   onde está o ponteiro */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid var(--bege);
+  outline-offset: 2px;
+}
+
+/* Respeita quem tem menos animação configurado no sistema operacional */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   CABEÇALHO (topo do site)
+   --------------------------------------------------------------------------- */
+.cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 28px;
+  background: var(--branco);
+  border-bottom: 1px solid var(--cinza-claro);
+  position: sticky; /* Fica fixo no topo ao rolar a página */
+  top: 0;
+  z-index: 1000;
+}
+
+/* Marca do site: logo do "D" + nome, imitando o logo oficial */
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 1.3rem;
+  letter-spacing: -0.5px;
+}
+
+/* Imagem da logo do D (recortada em círculo) */
+.marca-logo {
+  width: 34px;
+  height: 34px;
+  object-fit: cover; /* Corta a imagem sem distorcer */
+  border-radius: 8px;
+}
+
+/* Navegação do cabeçalho */
+.nav {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.nav a {
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--cinza);
+  transition: background 0.2s, color 0.2s;
+}
+
+.nav a:hover {
+  background: var(--creme);
+  color: var(--preto);
+}
+
+/* Estado da página ativa (onde o usuário está) */
+.nav a.ativo {
+  background: var(--preto);
+  color: var(--branco);
+}
+
+/* ---------------------------------------------------------------------------
+   LAYOUT PRINCIPAL
+   --------------------------------------------------------------------------- */
+.pagina {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+/* Título grande usado no topo de cada página */
+.titulo-pagina {
+  font-size: clamp(1.7rem, 4vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-bottom: 6px;
+}
+
+.subtitulo {
+  color: var(--cinza);
+  max-width: 60ch; /* Limita a largura do texto para facilitar a leitura */
+  margin-bottom: 28px;
+}
+
+/* Grade de cartões usada nas listas (atalhos, linhas, alertas) */
+.grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+/* Cartão genérico */
+.cartao {
+  background: var(--branco);
+  border: 1px solid var(--cinza-claro);
+  border-radius: var(--raio);
+  padding: 20px;
+  box-shadow: var(--sombra);
+  transition: transform 0.15s;
+}
+
+.cartao:hover {
+  transform: translateY(-3px); /* Sobe levemente ao passar o mouse */
+}
+
+.cartao h3 {
+  font-size: 1.05rem;
+  margin-bottom: 6px;
+}
+
+.cartao p {
+  font-size: 0.9rem;
+  color: var(--cinza);
+}
+
+/* ---------------------------------------------------------------------------
+   BOTÕES
+   --------------------------------------------------------------------------- */
+.botao {
+  display: inline-block;
+  background: var(--preto);
+  color: var(--branco);
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.botao:hover {
+  opacity: 0.85;
+}
+
+/* Botão secundário (menos importante) */
+.botao.secundario {
+  background: var(--creme);
+  color: var(--preto);
+  border: 1px solid var(--cinza-claro);
+}
+
+/* ---------------------------------------------------------------------------
+   ÁREA DO MAPA
+   --------------------------------------------------------------------------- */
+/* O mapa precisa de uma altura fixa, senão o Leaflet não renderiza */
+.mapa {
+  height: 460px;
+  width: 100%;
+  border-radius: var(--raio);
+  border: 1px solid var(--cinza-claro);
+  z-index: 1; /* Abaixo do cabeçalho, senão o mapa cobre a navegação */
+}
+
+/* ---------------------------------------------------------------------------
+   PÁGINA DO MAPA EM TELA CHEIA
+   --------------------------------------------------------------------------- */
+/* Estrutura: o mapa ocupa toda a área abaixo do cabeçalho */
+.tela-mapa {
+  position: relative; /* Ancora o painel flutuante dentro desta área */
+  height: calc(100vh - 62px); /* Altura total menos a altura do cabeçalho */
+  min-height: 480px;
+  overflow: hidden;
+}
+
+/* Mapa sem bordas nem arredondamento, preenchendo a tela toda */
+.mapa--tela-cheia {
+  height: 100%;
+  border-radius: 0;
+  border: none;
+}
+
+/* Painel de filtros flutuante sobre o mapa (lado direito) */
+.painel-filtros {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  bottom: 16px; /* Mesma distância do topo para baixo (fica centralizado) */
+  width: 330px;
+  max-width: calc(100% - 32px);
+
+  background: rgba(255, 255, 255, 0.97); /* Fundo quase opaco */
+  backdrop-filter: blur(8px); /* Desfoca o mapa atrás do painel */
+  border: 1px solid var(--cinza-claro);
+  border-radius: calc(var(--raio) + 4px);
+  box-shadow: 0 12px 40px rgba(29, 29, 27, 0.22); /* Sombra forte = sensação de flutuar */
+  padding: 18px;
+
+  /* Permite rolar a lista de filtros quando não cabe tudo */
+  overflow-y: auto;
+  z-index: 1000; /* Acima do mapa */
+}
+
+.painel-titulo {
+  font-size: 1rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+/* Lista de filtros (sem marcadores de lista) */
+.lista-filtros {
+  list-style: none;
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Botão de cada linha no painel */
+.filtro-linha {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--branco);
+  border: 1px solid var(--cinza-claro);
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.filtro-linha:hover {
+  background: var(--creme);
+}
+
+/* Estado marcado: destaque na borda e fundo */
+.filtro-linha.marcada {
+  border-color: var(--bege);
+  background: #fdfbf8;
+}
+
+/* Caixinha de seleção (quadrado com o "✓") */
+.filtro-linha .caixa {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border: 1.5px solid var(--cinza-claro);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--branco);
+}
+
+.filtro-linha.marcada .caixa {
+  background: var(--preto);
+  border-color: var(--preto);
+}
+
+/* Ícone de ônibus dentro de um círculo com a cor da linha */
+.filtro-linha .icone-filtro {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--creme);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Texto do filtro: código + nome em cima, previsão embaixo */
+.filtro-linha .texto-filtro {
+  flex: 1; /* Ocupa o espaço que sobra */
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Deixa o texto quebrar linha se for grande */
+}
+
+.filtro-linha .texto-filtro strong {
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Corta com "..." se não couber */
+}
+
+.filtro-linha .texto-filtro small {
+  font-size: 0.75rem;
+  color: var(--cinza);
+}
+
+/* Bolinha da cor da linha no fim do filtro */
+.filtro-linha .cor-linha {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Mensagem de lista vazia */
+.lista-filtros .vazio {
+  font-size: 0.85rem;
+  color: var(--cinza);
+  padding: 8px 2px;
+}
+
+/* Botão "Todas as linhas" (acima da lista individual) */
+.filtro-todas {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  margin-top: 14px;
+  background: var(--creme);
+  border: 1.5px solid var(--cinza-claro);
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.filtro-todas:hover {
+  background: var(--bege-claro);
+}
+
+/* Estado marcado: destaque na borda e fundo */
+.filtro-todas.marcada {
+  border-color: var(--bege);
+  background: #fdfbf8;
+}
+
+/* Caixinha de seleção (quadrado com o "✓") */
+.filtro-todas .caixa {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border: 1.5px solid var(--cinza-claro);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--branco);
+}
+
+.filtro-todas.marcada .caixa {
+  background: var(--preto);
+  border-color: var(--preto);
+}
+
+/* Ícone de ônibus dentro de um círculo (versão do "Todas as linhas") */
+.filtro-todas .icone-filtro {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--branco);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  order: 2; /* Coloca o ícone no fim, depois do texto */
+}
+
+/* Texto do filtro "Todas as linhas" */
+.filtro-todas .texto-filtro {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.filtro-todas .texto-filtro strong {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.filtro-todas .texto-filtro small {
+  font-size: 0.75rem;
+  color: var(--cinza);
+}
+
+/* ---------------------------------------------------------------------------
+   AVISO DO PONTO MAIS PRÓXIMO (canto inferior esquerdo do mapa)
+   --------------------------------------------------------------------------- */
+.aviso-proximo {
+  position: absolute;
+  left: 16px;
+  bottom: 24px;
+  z-index: 1000; /* Acima do mapa */
+
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+
+  max-width: 380px;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--cinza-claro);
+  border-radius: var(--raio);
+  box-shadow: 0 12px 40px rgba(29, 29, 27, 0.22);
+  padding: 14px 16px;
+}
+
+/* Ícone do aviso */
+.aviso-icone {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.aviso-proximo strong {
+  font-size: 0.9rem;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.aviso-proximo p {
+  font-size: 0.8rem;
+  color: var(--cinza);
+  line-height: 1.45;
+}
+
+/* Linhas extras com outros pontos próximos */
+.aviso-proximo .aviso-extra {
+  font-size: 0.75rem;
+  margin-top: 3px;
+}
+
+/* Versão de erro: localização não permitida */
+.aviso-proximo.aviso-erro {
+  background: rgba(253, 244, 242, 0.97);
+  border-color: #e8c4be;
+}
+
+/* Linha divisória dentro do painel */
+.divisor {
+  border: none;
+  border-top: 1px solid var(--cinza-claro);
+  margin: 16px 0;
+}
+
+/* Caixa de seleção dos alertas */
+.filtro-alertas {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filtro-alertas input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--preto); /* Cor do "visto" */
+}
+
+/* Legenda dentro do painel */
+.legenda-painel {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  font-size: 0.75rem;
+  color: var(--cinza);
+}
+
+.legenda-painel span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Legenda de status dos ônibus */
+.legenda {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  font-size: 0.85rem;
+  color: var(--cinza);
+}
+
+.legenda span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ponto-legend {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* ---------------------------------------------------------------------------
+   BADGES (etiquetas de status)
+   --------------------------------------------------------------------------- */
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.badge.operacao {
+  background: #e6efe8;
+  color: var(--verde);
+}
+
+.badge.fora {
+  background: #f7e7e5;
+  color: var(--vermelho);
+}
+
+.badge.medio {
+  background: #f7efd9;
+  color: var(--amarelo);
+}
+
+.badge.vazio {
+  background: #e6efe8;
+  color: var(--verde);
+}
+
+.badge.cheio {
+  background: #f7e7e5;
+  color: var(--vermelho);
+}
+
+/* ---------------------------------------------------------------------------
+   FORMULÁRIOS (busca e denúncias)
+   --------------------------------------------------------------------------- */
+.campo {
+  width: 100%;
+  padding: 13px 18px;
+  border: 1px solid var(--cinza-claro);
+  border-radius: 999px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: var(--branco);
+}
+
+.campo:focus {
+  border-color: var(--bege);
+}
+
+/* Rótulo acima dos campos de formulário */
+.rotulo {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin: 14px 0 6px;
+}
+
+textarea.campo {
+  border-radius: var(--raio);
+  min-height: 110px;
+  resize: vertical;
+}
+
+/* Aviso de sucesso após enviar um formulário */
+.aviso-sucesso {
+  background: #e6efe8;
+  color: var(--verde);
+  padding: 14px 18px;
+  border-radius: var(--raio);
+  font-weight: 600;
+  margin-top: 16px;
+}
+
+/* ---------------------------------------------------------------------------
+   PÁGINA INICIAL - destaque e atalhos
+   --------------------------------------------------------------------------- */
+.destaque {
+  background: var(--preto);
+  color: var(--branco);
+  border-radius: calc(var(--raio) + 8px);
+  padding: 44px 36px;
+  margin-bottom: 32px;
+}
+
+.destaque h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  line-height: 1.1;
+  max-width: 16ch;
+}
+
+.destaque p {
+  color: #b8b5b0;
+  margin: 14px 0 24px;
+  max-width: 52ch;
+}
+
+.destaque .botao {
+  background: var(--bege);
+  color: var(--preto);
+}
+
+/* Ícone circular usado nos atalhos da home */
+.atalho-icone {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--bege-claro);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  margin-bottom: 12px;
+}
+
+/* ---------------------------------------------------------------------------
+   RODAPÉ
+   --------------------------------------------------------------------------- */
+.rodape {
+  background: var(--preto);
+  color: #b8b5b0;
+  text-align: center;
+  padding: 28px 20px;
+  font-size: 0.85rem;
+}
+
+.rodape strong {
+  color: var(--branco);
+}
+
+/* ---------------------------------------------------------------------------
+   RESPONSIVIDADE (celular)
+   --------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+  .cabecalho {
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .destaque {
+    padding: 30px 22px;
+  }
+
+  .mapa {
+    height: 340px;
+  }
+
+  /* No celular o painel vira uma barra embaixo do mapa (não cobre tudo) */
+  .tela-mapa {
+    height: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mapa--tela-cheia {
+    height: 55vh; /* 55% da altura da tela para o mapa */
+  }
+
+  .painel-filtros {
+    position: static; /* Sai de cima do mapa e fica abaixo dele */
+    width: 100%;
+    max-width: 100%;
+    border-radius: 0;
+    box-shadow: none;
+    max-height: none;
+  }
+
+  /* Aviso do ponto mais próximo vira barra embaixo do mapa */
+  .aviso-proximo {
+    position: static;
+    max-width: 100%;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
