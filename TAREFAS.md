@@ -58,7 +58,7 @@ git push
 
 ### 🔴 Urgente (cronograma da faculdade)
 
-- [ ] **Commit inicial no GitHub** — subir tudo para `desloca_web`
+- [x] **Commit inicial no GitHub** — branch `feature/prototipo-navegavel` enviada em 03/11
 - [ ] **README inicial** já está feito, mas precisa dos **badges** e print das telas
 - [ ] **Diagrama de arquitetura técnica** (tarefa de 05/11) — desenho das camadas:
       front-end → API → back-end → banco
