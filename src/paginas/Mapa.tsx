@@ -1,28 +1,27 @@
 // =============================================================================
-// PÁGINA DO MAPA
+// PÁGINA DO MAPA & LINHAS INTEGRADA
 // =============================================================================
-// Tela principal do projeto: mapa em tela cheia com o painel de filtros
-// flutuante sobreposto no lado direito.
-//
-// Recursos desta tela:
-//   1. Filtro de linhas (com opção "Todas as linhas")
-//   2. Localização do usuário e cálculo do ponto de ônibus mais próximo
-//   3. Alertas de trânsito ligáveis/desligáveis
-//   4. Popup de detalhes ao clicar na linha do mapa
-//   5. Botão de notificações (sino) com dicas em toast
-//   6. Botão de denúncia com formulário
+// Tela principal e central do Desloca:
+//   1. Mapa interativo com todas as linhas, paradas e ônibus em tempo real.
+//   2. Ônibus andando em tempo real pelo mapa (animação contínua).
+//   3. Modo limpo: possibilidade de não selecionar nenhum ônibus/linha, exibindo
+//      apenas os veículos em movimento pelas ruas.
+//   4. Botão de restauração flutuante quando o painel for minimizado.
+//   5. Painel de Linhas integrado com detalhes completos, horários e paradas.
+//   6. Notificações ("Tudo que tá rolando") e Denúncias integradas na tela.
 // =============================================================================
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import MapaDesloca from '../componentes/MapaDesloca'
-import { LINHAS, ALERTAS, type Linha } from '../dados/linhas'
-import { distanciaKm, tempoCaminhadaMin, formatarDistancia } from '../utilidades/geo'
+import PopupNotificacoes from '../componentes/PopupNotificacoes'
+import PopupDenuncia, { type DadosDenuncia } from '../componentes/PopupDenuncia'
+import DicaNotificacao from '../componentes/DicaNotificacao'
 import Toast from '../componentes/Toast'
-import PopupDetalhesLinha from '../componentes/PopupDetalhesLinha'
-import PopupDenuncia from '../componentes/PopupDenuncia'
+import { LINHAS, ALERTAS, type Linha, type Alerta } from '../dados/linhas'
+import { distanciaKm, tempoCaminhadaMin, formatarDistancia } from '../utilidades/geo'
 
-// Ícone SVG de ônibus usado nos filtros (desenhado à mão para não depender
-// de emoji, que muda de desenho em cada sistema operacional)
+// Ícone SVG de ônibus reutilizável
 function IconeOnibus({ cor }: { cor: string }) {
   return (
     <svg
@@ -53,61 +52,118 @@ function IconeOnibus({ cor }: { cor: string }) {
 }
 
 export default function Mapa() {
-  // Estado da busca: o que o usuário digitou no campo de procura
+  const [searchParams] = useSearchParams()
+
+  // Estados de busca e filtros
   const [busca, setBusca] = useState('')
+  const [filtroStatus, setFiltroStatus] = useState<'todas' | 'operacao'>('todas')
 
-  // Linhas que o usuário marcou no painel de filtros (vazio = mostra todas)
-  const [linhasSelecionadas, setLinhasSelecionadas] = useState<number[]>([])
+  // Linhas cujos trajetos e pontos serão desenhados no mapa (vazio = modo limpo, só ônibus andando!)
+  const [linhasVisiveisIds, setLinhasVisiveisIds] = useState<number[]>([])
 
-  // Filtro de alertas ligado ou desligado
   const [mostrarAlertas, setMostrarAlertas] = useState(true)
 
-  // Localização do usuário (null enquanto não autoriza ou ainda não chegou)
+  // Linha selecionada para detalhes completos
+  const [linhaSelecionada, setLinhaSelecionada] = useState<Linha | null>(null)
+
+  // Coordenadas para foco no mapa (quando o usuário clica numa parada ou alerta)
+  const [focoCoords, setFocoCoords] = useState<[number, number] | null>(null)
+
+  // Modais flutuantes e estado dos painéis
+  const [mostrarNotificacoes, setMostrarNotificacoes] = useState(false)
+  const [mostrarDenuncia, setMostrarDenuncia] = useState(false)
+  const [painelAbertoMobile, setPainelAbertoMobile] = useState(true)
+  const [painelMinimizadoDesktop, setPainelMinimizadoDesktop] = useState(false)
+
+  // Notificações e alertas dinâmicos
+  const [alertasLista, setAlertasLista] = useState<Alerta[]>(ALERTAS)
+  const [notificacoesNaoLidas, setNotificacoesNaoLidas] = useState(3)
+
+  // Localização do usuário
   const [minhaPosicao, setMinhaPosicao] = useState<[number, number] | null>(null)
   const [erroLocalizacao, setErroLocalizacao] = useState(false)
 
-  // NOVO: estado para o popup de detalhes da linha
-  const [linhaDetalhe, setLinhaDetalhe] = useState<Linha | null>(null)
+  // Sistema de dicas e toasts
+  const [dicaContextual, setDicaContextual] = useState<string | null>(null)
+  const [toastMensagem, setToastMensagem] = useState<string | null>(null)
 
-  // NOVO: estado para o popup de denúncia
-  const [mostrarDenuncia, setMostrarDenuncia] = useState(false)
+  // ---------------------------------------------------------------------------
+  // Disparador de dica contextual
+  // ---------------------------------------------------------------------------
+  const dispararDica = useCallback((mensagem: string) => {
+    setDicaContextual(mensagem)
+  }, [])
 
-  // NOVO: estado para o toast de dicas
-  const [toast, setToast] = useState<string | null>(null)
-
-  // NOVO: estado para notificações (sino)
-  const [mostrarNotificacoes, setMostrarNotificacoes] = useState(false)
-
-  // -----------------------------------------------------------------------------
-  // Pede a localização do usuário ao abrir a página.
-  // O navegador mostra um aviso pedindo permissão (é obrigatório pedir).
-  // -----------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  // Integração com parâmetros da URL (ex.: ?acao=denuncia ou ?linha=101)
+  // ---------------------------------------------------------------------------
   useEffect(() => {
-    // Verifica se o navegador suporta geolocalização
+    const acao = searchParams.get('acao')
+    const codigoLinha = searchParams.get('linha')
+
+    if (acao === 'denuncia') {
+      setMostrarDenuncia(true)
+      dispararDica('Dica: Informar detalhes e pontos de referência agiliza a resposta da equipe.')
+    }
+
+    if (codigoLinha) {
+      const encontrada = LINHAS.find((l) => l.codigo === codigoLinha)
+      if (encontrada) {
+        setLinhaSelecionada(encontrada)
+        dispararDica(`Dica: Toque nos pontos de parada da Linha ${encontrada.codigo} para focar no mapa.`)
+      }
+    }
+  }, [searchParams, dispararDica])
+
+  // ---------------------------------------------------------------------------
+  // Geolocalização do usuário
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
     if (!('geolocation' in navigator)) {
       setErroLocalizacao(true)
       return
     }
 
     navigator.geolocation.getCurrentPosition(
-      // Sucesso: guarda as coordenadas (latitude, longitude)
-      (posicao) => setMinhaPosicao([posicao.coords.latitude, posicao.coords.longitude]),
-      // Erro: usuário negou a permissão ou não foi possível encontrar
+      (pos) => setMinhaPosicao([pos.coords.latitude, pos.coords.longitude]),
       () => setErroLocalizacao(true),
       { enableHighAccuracy: true, timeout: 8000 }
     )
   }, [])
 
-  // -----------------------------------------------------------------------------
-  // Calcula os pontos de ônibus mais próximos da localização do usuário.
-  // useMemo guarda o resultado e só recalcula quando a posição muda.
-  // -----------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  // Dica inicial e rotativa
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    const timerInicial = setTimeout(() => {
+      dispararDica('Dica: Toque em qualquer linha da lista ou do mapa para ver o trajeto e os horários em tempo real.')
+    }, 1800)
+
+    const intervaloDicas = setInterval(() => {
+      const dicasExtras = [
+        'Dica: No modo limpo, você pode acompanhar os ônibus na cidade sem poluição visual.',
+        'Dica de Mobilidade: Andar de ônibus poupa combustível e reduz as emissões de carbono da cidade.',
+        'Dica: No Terminal Central a integração temporal entre linhas é garantida por até 60 minutos.',
+        'Dica: O botão ⚠️ no canto do mapa permite reportar buracos, iluminação falha ou paradas quebradas.',
+        'Dica: Clique no sino 🔔 para ver o boletim de obras e alertas de trânsito atualizados ao vivo.',
+      ]
+      const sorteada = dicasExtras[Math.floor(Math.random() * dicasExtras.length)]
+      dispararDica(sorteada)
+    }, 55000)
+
+    return () => {
+      clearTimeout(timerInicial)
+      clearInterval(intervaloDicas)
+    }
+  }, [dispararDica])
+
+  // ---------------------------------------------------------------------------
+  // Cálculo dos pontos mais próximos do usuário
+  // ---------------------------------------------------------------------------
   const pontosProximos = useMemo(() => {
     if (!minhaPosicao) return []
 
-    // Guarda a distância de TODOS os pontos de todas as linhas
     const todos: { distancia: number; nome: string; linha: Linha }[] = []
-
     LINHAS.forEach((linha) => {
       linha.pontos.forEach((ponto) => {
         todos.push({
@@ -118,112 +174,271 @@ export default function Mapa() {
       })
     })
 
-    // Ordena do mais perto para o mais longe e pega os 3 primeiros.
-    // O filtro por nome evita repetir o mesmo ponto (várias linhas podem
-    // compartilhar a mesma parada, ex.: Terminal Central).
     const ordenados = todos.sort((a, b) => a.distancia - b.distancia)
     const vistos = new Set<string>()
     const unicos: typeof ordenados = []
 
     for (const item of ordenados) {
-      if (vistos.has(item.nome)) continue // Pula ponto já adicionado
+      if (vistos.has(item.nome)) continue
       vistos.add(item.nome)
       unicos.push(item)
-      if (unicos.length === 3) break // Guarda só os 3 mais próximos
+      if (unicos.length === 3) break
     }
 
     return unicos
   }, [minhaPosicao])
 
-  // Ponto mais perto (primeiro da lista) — usado no aviso em destaque
   const pontoMaisProximo = pontosProximos[0]
 
-  // Filtra as linhas pelo que foi digitado (código ou nome)
-  const linhasFiltradas = LINHAS.filter(
-    (linha) =>
-      linha.nome.toLowerCase().includes(busca.toLowerCase()) ||
-      linha.codigo.includes(busca)
-  )
+  // ---------------------------------------------------------------------------
+  // Filtragem das linhas da lista
+  // ---------------------------------------------------------------------------
+  const linhasFiltradas = useMemo(() => {
+    return LINHAS.filter((linha) => {
+      const coincideBusca =
+        linha.nome.toLowerCase().includes(busca.toLowerCase()) ||
+        linha.codigo.toLowerCase().includes(busca.toLowerCase())
 
-  // Linhas visíveis no mapa: as que passaram na busca E estão marcadas nos filtros
-  const linhasVisiveis = linhasFiltradas.filter(
-    (linha) => linhasSelecionadas.length === 0 || linhasSelecionadas.includes(linha.id)
-  )
+      const coincideStatus =
+        filtroStatus === 'todas' ? true : linha.status === 'operacao'
 
-  // Liga/desliga uma linha no painel de filtros
-  function alternarLinha(id: number) {
-    setLinhasSelecionadas((atual) =>
-      atual.includes(id) ? atual.filter((item) => item !== id) : [...atual, id]
+      return coincideBusca && coincideStatus
+    })
+  }, [busca, filtroStatus])
+
+  // ---------------------------------------------------------------------------
+  // Linhas cujos trajetos e paradas serão desenhados no mapa
+  // Se nenhuma estiver marcada e nenhuma linha estiver inspecionada, retorna []
+  // (MODO LIMPO: apenas os ônibus andando!)
+  // ---------------------------------------------------------------------------
+  const linhasComTrajeto = useMemo(() => {
+    if (linhaSelecionada) return [linhaSelecionada]
+    if (linhasVisiveisIds.length === 0) return [] // Modo limpo: nenhum traçado desenhado
+    return LINHAS.filter((l) => linhasVisiveisIds.includes(l.id))
+  }, [linhaSelecionada, linhasVisiveisIds])
+
+  // Todas as linhas marcadas?
+  const todasMarcadas = linhasVisiveisIds.length === LINHAS.length
+  const nenhumaMarcada = linhasVisiveisIds.length === 0
+
+  function alternarTodas() {
+    if (todasMarcadas) {
+      setLinhasVisiveisIds([])
+      dispararDica('Modo limpo ativado: apenas os marcadores de ônibus continuam no mapa!')
+    } else {
+      setLinhasVisiveisIds(LINHAS.map((l) => l.id))
+      dispararDica('Exibindo todos os trajetos e pontos de parada no mapa.')
+    }
+  }
+
+  function alternarLinhaVisibilidade(id: number, e: React.MouseEvent) {
+    e.stopPropagation()
+    setLinhasVisiveisIds((atual) => {
+      const novo = atual.includes(id) ? atual.filter((item) => item !== id) : [...atual, id]
+      if (novo.length === 0) {
+        dispararDica('Nenhum trajeto selecionado. Apenas os ônibus continuam visíveis no mapa.')
+      } else {
+        dispararDica(`Trajeto atualizado no mapa (${novo.length} visíveis).`)
+      }
+      return novo
+    })
+  }
+
+  // ---------------------------------------------------------------------------
+  // Seleção e interação com a Linha
+  // ---------------------------------------------------------------------------
+  function selecionarLinha(linha: Linha) {
+    setLinhaSelecionada(linha)
+    setPainelAbertoMobile(true)
+    setPainelMinimizadoDesktop(false)
+    dispararDica(
+      `Linha ${linha.codigo}: Toque em qualquer ponto de parada da lista para aproximar o mapa!`
     )
   }
 
-  // Marca ou desliga todas as linhas de uma vez
-  function alternarTodas() {
-    // Se já estão todas marcadas (lista vazia), marca apenas a primeira.
-    // Se tem alguma marcada, limpa tudo (volta a mostrar todas).
-    setLinhasSelecionadas((atual) => (atual.length === 0 ? [LINHAS[0].id] : []))
+  function desmarcarLinha() {
+    setLinhaSelecionada(null)
+    setFocoCoords(null)
   }
 
-  // Verifica se TODAS as linhas estão marcadas (lista vazia = tudo visível)
-  const todasMarcadas = linhasSelecionadas.length === 0
-
-  // Converte a lista de alertas no formato que o componente do mapa espera
-  const alertasCoords = mostrarAlertas
-    ? ALERTAS.map((a) => ({ coords: a.coords, titulo: a.titulo }))
-    : []
-
-  // Handlers para os popups
-  function handleLinhaClick(linha: Linha) {
-    setLinhaDetalhe(linha)
+  // Clique em ponto de parada
+  function focarPonto(coords: [number, number], nome: string) {
+    setFocoCoords(coords)
+    dispararDica(`Aproximando parada: ${nome}`)
   }
 
-  function handleDenunciaEnviada(tipo: string, local: string, descricao: string) {
-    console.log('Denúncia enviada:', { tipo, local, descricao })
-    setToast('✓ Denúncia registrada!')
+  // Centralizar na localização do usuário
+  function centralizarNoUsuario() {
+    if (minhaPosicao) {
+      setFocoCoords(minhaPosicao)
+      dispararDica('Mapa centralizado na sua localização atual.')
+    } else {
+      dispararDica('Ative a permissão de GPS no navegador para encontrar paradas próximas.')
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Handlers de Notificação e Denúncia
+  // ---------------------------------------------------------------------------
+  function handleAbrirNotificacoes() {
+    setMostrarNotificacoes(true)
+    dispararDica('Dica: Você pode tocar em "Ver local no mapa" para conferir desvios e ocorrências.')
+  }
+
+  function handleAbrirDenuncia() {
+    setMostrarDenuncia(true)
+    dispararDica('Dica: Se estiver no ponto ou ônibus, use a opção "Usar meu GPS" para preencher o local.')
+  }
+
+  function handleDenunciaEnviada(dados: DadosDenuncia) {
+    const novoAlerta: Alerta = {
+      id: Date.now(),
+      tipo: dados.tipo === 'buraco' ? 'obra' : 'transito',
+      titulo: `Relato da comunidade: ${dados.local}`,
+      descricao: dados.descricao || 'Problema reportado recentemente por passageiro.',
+      coords: minhaPosicao || [-21.2087, -50.4347],
+      horario: 'Agora mesmo',
+    }
+
+    setAlertasLista((prev) => [novoAlerta, ...prev])
+    setToastMensagem('✓ Denúncia registrada com sucesso! Ponto marcado no mapa.')
     setMostrarDenuncia(false)
+    dispararDica('Obrigado! Sua colaboração ajuda a mobilidade urbana de Araçatuba.')
   }
-
-  // Toast de dica automática após 3 segundos
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setToast('💡 Dica: use o filtro "Todas as linhas" para ver todas as opções.')
-    }, 3000)
-    return () => clearTimeout(timer)
-  }, [])
 
   return (
-    <div className="tela-mapa">
-      {/* Mapa ocupando toda a área disponível da tela */}
+    <div className="tela-mapa tela-mapa-unificada">
+      {/* -------------------------------------------------------------------------
+          MAPA PRINCIPAL (Ônibus andando em tempo real + rotas selecionadas)
+      ------------------------------------------------------------------------- */}
       <MapaDesloca
-        linhas={linhasVisiveis}
-        linhaAtiva={null}
-        alertasCoords={alertasCoords}
+        linhasComTrajeto={linhasComTrajeto}
+        todasLinhas={LINHAS}
+        linhaAtiva={linhaSelecionada}
+        alertasCoords={
+          mostrarAlertas
+            ? alertasLista.map((a) => ({
+                coords: a.coords,
+                titulo: a.titulo,
+                tipo: a.tipo,
+                descricao: a.descricao,
+                id: a.id,
+              }))
+            : []
+        }
         telaCheia
         minhaPosicao={minhaPosicao}
-        onLinhaClick={handleLinhaClick}
+        focoCoords={focoCoords}
+        onLinhaClick={selecionarLinha}
+        onPontoClick={(ponto) => focarPonto(ponto.coords, ponto.nome)}
+        onAlertaClick={(alerta) => {
+          setFocoCoords(alerta.coords)
+          dispararDica(`Ocorrência: ${alerta.titulo}`)
+        }}
       />
 
-      {/* Botão de sino (notificações) - canto superior direito */}
-      <button
-        className="botao-flutuante sino"
-        onClick={() => setMostrarNotificacoes(!mostrarNotificacoes)}
-        aria-label="Notificações"
-      >
-        🔔
-      </button>
+      {/* -------------------------------------------------------------------------
+          BARRA DE AÇÕES FLUTUANTES (Top bar sobre o mapa)
+      ------------------------------------------------------------------------- */}
+      <div className="acoes-flutuantes-mapa" role="toolbar" aria-label="Ações do mapa">
+        {/* Sino de Notificações com badge de novidades */}
+        <button
+          type="button"
+          className="botao-flutuante sino-notificacoes"
+          onClick={handleAbrirNotificacoes}
+          aria-label="Abrir central de notificações e ocorrências"
+          title="Ver o que tá rolando"
+        >
+          <span className="icone" aria-hidden="true">
+            🔔
+          </span>
+          {notificacoesNaoLidas > 0 && (
+            <span className="notificacao-badge" aria-label={`${notificacoesNaoLidas} novidades`}>
+              {notificacoesNaoLidas}
+            </span>
+          )}
+        </button>
 
-      {/* Botão de denúncia - canto inferior direito */}
-      <button
-        className="botao-flutuante denuncia"
-        onClick={() => setMostrarDenuncia(!mostrarDenuncia)}
-        aria-label="Reportar problema"
-      >
-        ⚠️
-      </button>
+        {/* Botão de Perigo / Denúncia */}
+        <button
+          type="button"
+          className="botao-flutuante botao-alerta-denuncia"
+          onClick={handleAbrirDenuncia}
+          aria-label="Reportar problema ou denúncia na via"
+          title="Reportar problema na via ou transporte"
+        >
+          <span className="icone-perigo" aria-hidden="true">
+            ⚠️
+          </span>
+          <span className="texto-botao-fab">Denunciar</span>
+        </button>
 
-      {/* Aviso flutuante com o ponto mais próximo (canto inferior esquerdo) */}
-      {pontoMaisProximo && (
-        <div className="aviso-proximo" role="status">
+        {/* Botão de GPS / Meu Local */}
+        <button
+          type="button"
+          className="botao-flutuante botao-meu-local"
+          onClick={centralizarNoUsuario}
+          aria-label="Centralizar no meu local"
+          title="Meu local no mapa"
+        >
+          <span className="icone" aria-hidden="true">
+            🎯
+          </span>
+        </button>
+
+        {/* Botão de alternar painel (acessível no mobile e desktop) */}
+        <button
+          type="button"
+          className="botao-flutuante botao-toggle-painel"
+          onClick={() => {
+            if (window.innerWidth <= 860) {
+              setPainelAbertoMobile((prev) => !prev)
+            } else {
+              setPainelMinimizadoDesktop((prev) => !prev)
+            }
+          }}
+          aria-label="Alternar exibição do painel de linhas"
+          title="Abrir ou ocultar painel de linhas"
+        >
+          <span className="icone" aria-hidden="true">
+            🚌
+          </span>
+          <span className="texto-toggle">
+            {painelMinimizadoDesktop ? 'Abrir Linhas' : 'Linhas'}
+          </span>
+        </button>
+      </div>
+
+      {/* -------------------------------------------------------------------------
+          BOTÃO RESTAURAR PAINEL (Aparece no Desktop quando o painel for minimizado)
+      ------------------------------------------------------------------------- */}
+      {painelMinimizadoDesktop && (
+        <button
+          type="button"
+          className="botao-restaurar-painel"
+          onClick={() => setPainelMinimizadoDesktop(false)}
+          aria-label="Restaurar painel de linhas"
+          title="Clique para reabrir o painel de linhas"
+        >
+          <span className="icone" aria-hidden="true">
+            ◀
+          </span>
+          <span className="texto">Linhas & Horários</span>
+          <span className="badge-contador">{LINHAS.length}</span>
+        </button>
+      )}
+
+      {/* -------------------------------------------------------------------------
+          CARD DO PONTO MAIS PRÓXIMO (Canto inferior esquerdo)
+      ------------------------------------------------------------------------- */}
+      {pontoMaisProximo ? (
+        <aside
+          className="aviso-proximo"
+          role="status"
+          onClick={() => focarPonto(pontoMaisProximo.linha.pontos[0].coords, pontoMaisProximo.nome)}
+          style={{ cursor: 'pointer' }}
+          title="Clique para aproximar no mapa"
+        >
           <span className="aviso-icone" aria-hidden="true">
             📍
           </span>
@@ -233,164 +448,413 @@ export default function Mapa() {
               Linha {pontoMaisProximo.linha.codigo} · {formatarDistancia(pontoMaisProximo.distancia)} ·{' '}
               <b>{tempoCaminhadaMin(pontoMaisProximo.distancia)} min a pé</b>
             </p>
-            {/* Mostra os outros 2 pontos próximos em texto menor */}
             {pontosProximos.slice(1).map((ponto) => (
               <p key={`${ponto.linha.id}-${ponto.nome}`} className="aviso-extra">
                 Também: {ponto.nome} ({formatarDistancia(ponto.distancia)})
               </p>
             ))}
           </div>
-        </div>
-      )}
-
-      {/* Mensagem caso a localização não esteja disponível */}
-      {erroLocalizacao && !minhaPosicao && (
-        <div className="aviso-proximo aviso-erro" role="status">
+        </aside>
+      ) : erroLocalizacao ? (
+        <aside className="aviso-proximo aviso-erro" role="status">
           <span className="aviso-icone" aria-hidden="true">
             ℹ️
           </span>
           <div>
             <strong>Localização indisponível</strong>
-            <p>Permita o acesso à localização para ver os pontos mais próximos.</p>
+            <p>Ative a permissão de GPS para ver pontos próximos a você.</p>
           </div>
-        </div>
-      )}
+        </aside>
+      ) : null}
 
-      {/* Painel de filtros flutuando por cima do mapa, no lado direito */}
-      <aside className="painel-filtros" aria-label="Filtros do mapa">
-        <h2 className="painel-titulo">Filtrar linhas</h2>
-
-        {/* Busca por nome ou código */}
-        <input
-          className="campo"
-          type="search"
-          placeholder="Buscar linha..."
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-          aria-label="Buscar linha"
-        />
-
-        {/* Botão que marca/desmarca todas as linhas de uma vez */}
-        <button
-          className={`filtro-todas ${todasMarcadas ? 'marcada' : ''}`}
-          onClick={alternarTodas}
-          aria-pressed={todasMarcadas}
+      {/* -------------------------------------------------------------------------
+          PAINEL INTEGRADO DE LINHAS & DETALHES (Lado direito / Bottom Sheet)
+      ------------------------------------------------------------------------- */}
+      <aside
+        className={`painel-linhas-integrado ${
+          painelAbertoMobile ? 'mobile-aberto' : 'mobile-fechado'
+        } ${painelMinimizadoDesktop ? 'desktop-minimizado' : ''}`}
+        aria-label="Painel de linhas e itinerários"
+      >
+        {/* Handle de toque para celular */}
+        <div
+          className="painel-touch-handle"
+          onClick={() => setPainelAbertoMobile((prev) => !prev)}
+          aria-hidden="true"
         >
-          <span className="caixa" aria-hidden="true">
-            {todasMarcadas && '✓'}
-          </span>
-          <span className="texto-filtro">
-            <strong>Todas as linhas</strong>
-            <small>{todasMarcadas ? 'Exibindo o mapa completo' : 'Toque para mostrar todas'}</small>
-          </span>
-          {/* Ícone de ônibus com a cor preta (representa o conjunto) */}
-          <span className="icone-filtro">
-            <IconeOnibus cor="#1D1D1B" />
-          </span>
-        </button>
-
-        {/* Lista de linhas com botão de seleção */}
-        <ul className="lista-filtros">
-          {linhasFiltradas.map((linha) => {
-            // Verifica se esta linha está marcada nos filtros
-            const marcada = linhasSelecionadas.length === 0 || linhasSelecionadas.includes(linha.id)
-
-            return (
-              <li key={linha.id}>
-                <button
-                  className={`filtro-linha ${marcada ? 'marcada' : ''}`}
-                  onClick={() => alternarLinha(linha.id)}
-                  // aria-pressed informa ao leitor de tela se o botão está ativo
-                  aria-pressed={marcada}
-                >
-                  {/* Caixinha de seleção */}
-                  <span className="caixa" aria-hidden="true">
-                    {marcada && '✓'}
-                  </span>
-
-                  {/* Ícone de ônibus na cor da linha */}
-                  <span className="icone-filtro">
-                    <IconeOnibus cor={linha.cor} />
-                  </span>
-
-                  {/* Texto da linha */}
-                  <span className="texto-filtro">
-                    <strong>
-                      {linha.codigo} — {linha.nome}
-                    </strong>
-                    <small>
-                      {linha.status === 'operacao'
-                        ? `Próximo em ${linha.proximoOnibus.previsao}`
-                        : 'Fora de linha'}
-                    </small>
-                  </span>
-
-                  {/* Bolinha com a cor da linha */}
-                  <i className="cor-linha" style={{ background: linha.cor }} />
-                </button>
-              </li>
-            )
-          })}
-
-          {/* Mensagem exibida quando nenhuma linha é encontrada */}
-          {linhasFiltradas.length === 0 && (
-            <li className="vazio">Nenhuma linha encontrada.</li>
-          )}
-        </ul>
-
-        {/* Separador */}
-        <hr className="divisor" />
-
-        {/* Filtro dos alertas */}
-        <label className="filtro-alertas">
-          <input
-            type="checkbox"
-            checked={mostrarAlertas}
-            onChange={(e) => setMostrarAlertas(e.target.checked)} // Liga/desliga alertas
-          />
-          <span>Mostrar alertas de trânsito</span>
-        </label>
-
-        {/* Legenda dos símbolos do mapa */}
-        <div className="legenda-painel">
-          <span>
-            <i className="ponto-legend" style={{ background: '#1D1D1B' }} /> Ônibus
-          </span>
-          <span>
-            <i className="ponto-legend" style={{ background: '#fff', border: '2px solid #1D1D1B' }} />{' '}
-            Ponto
-          </span>
-          <span>
-            <i className="ponto-legend" style={{ background: '#B3453A' }} /> Alerta
-          </span>
-          <span>
-            <i className="ponto-legend" style={{ background: '#2563EB' }} /> Você
-          </span>
+          <div className="barra-puxar" />
         </div>
+
+        {/* =====================================================================
+            CASO 1: DETALHES COMPLETOS DA LINHA SELECIONADA
+        ===================================================================== */}
+        {linhaSelecionada ? (
+          <div className="painel-detalhe-linha">
+            {/* Cabeçalho do detalhe */}
+            <div className="detalhe-linha-topo">
+              <button
+                type="button"
+                className="botao-voltar-linhas"
+                onClick={desmarcarLinha}
+                aria-label="Voltar para a lista de todas as linhas"
+              >
+                ← Todas as linhas
+              </button>
+              <button
+                type="button"
+                className="botao-fechar-detalhe"
+                onClick={desmarcarLinha}
+                aria-label="Fechar"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="detalhe-linha-titulo-bloco">
+              <span className="barra-cor-linha" style={{ background: linhaSelecionada.cor }} />
+              <div>
+                <h2>
+                  {linhaSelecionada.codigo} — {linhaSelecionada.nome}
+                </h2>
+                <span className={`badge ${linhaSelecionada.status}`}>
+                  {linhaSelecionada.status === 'operacao' ? 'Em operação normal' : 'Fora de linha'}
+                </span>
+              </div>
+            </div>
+
+            {/* Métricas rápidas */}
+            <div className="detalhe-metricas-grid">
+              <div className="metrica-box">
+                <span className="rotulo">💰 Tarifa</span>
+                <strong>{linhaSelecionada.tarifa}</strong>
+              </div>
+              <div className="metrica-box">
+                <span className="rotulo">⏰ Frequência</span>
+                <strong>{linhaSelecionada.frequencia}</strong>
+              </div>
+              <div className="metrica-box">
+                <span className="rotulo">🕒 Início</span>
+                <strong>05h30</strong>
+              </div>
+              <div className="metrica-box">
+                <span className="rotulo">🌙 Último</span>
+                <strong>23h30</strong>
+              </div>
+            </div>
+
+            {/* Informações do próximo ônibus em circulação */}
+            {linhaSelecionada.status === 'operacao' && (
+              <div className="cartao-proximo-veiculo">
+                <div className="proximo-veiculo-topo">
+                  <span className="icone-bus" aria-hidden="true">
+                    🚌
+                  </span>
+                  <div>
+                    <strong>Próximo veículo: Placa {linhaSelecionada.proximoOnibus.placa}</strong>
+                    <p>Previsão estimada: <b>{linhaSelecionada.proximoOnibus.previsao}</b></p>
+                  </div>
+                </div>
+                <div className="lotacao-status-barra">
+                  <span className="texto-lotacao">Lotação estimada:</span>
+                  <span className={`badge ${linhaSelecionada.proximoOnibus.lotacao}`}>
+                    {linhaSelecionada.proximoOnibus.lotacao === 'vazio'
+                      ? '🟢 Vago'
+                      : linhaSelecionada.proximoOnibus.lotacao === 'medio'
+                        ? '🟡 Movimento moderado'
+                        : '🔴 Cheio'}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Timeline interativa de Pontos de Parada */}
+            <div className="secao-pontos-parada">
+              <div className="pontos-cabecalho">
+                <h3>Pontos de parada ({linhaSelecionada.pontos.length})</h3>
+                <small>Toque para aproximar no mapa</small>
+              </div>
+
+              <ol className="lista-pontos-detalhe">
+                {linhaSelecionada.pontos.map((ponto, index) => (
+                  <li
+                    key={`${ponto.nome}-${index}`}
+                    className="item-ponto-interativo"
+                    onClick={() => focarPonto(ponto.coords, ponto.nome)}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <span
+                      className="circulo-ordem"
+                      style={{ borderColor: linhaSelecionada.cor }}
+                    >
+                      {index + 1}
+                    </span>
+                    <div className="ponto-info">
+                      <strong className="ponto-nome">{ponto.nome}</strong>
+                      <span className="ponto-acao-texto">📍 Ver parada no mapa</span>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            {/* Ações de rodapé da linha */}
+            <div className="detalhe-linha-acoes">
+              <button
+                type="button"
+                className="botao botao-secundario botao-full"
+                onClick={() => {
+                  setMostrarDenuncia(true)
+                  dispararDica(`Reportando ocorrência vinculada à Linha ${linhaSelecionada.codigo}`)
+                }}
+              >
+                ⚠️ Reportar problema nesta linha
+              </button>
+            </div>
+          </div>
+        ) : (
+          /* =====================================================================
+              CASO 2: LISTA DE LINHAS & FILTROS (VISÃO GERAL)
+          ===================================================================== */
+          <div className="painel-lista-linhas">
+            <div className="painel-cabecalho-principal">
+              <div>
+                <h2 className="painel-titulo">Linhas de ônibus</h2>
+                <p className="painel-subtitulo">
+                  Selecione uma linha ou veja os ônibus circulando
+                </p>
+              </div>
+              <button
+                type="button"
+                className="botao-minimizar-desktop"
+                onClick={() => {
+                  setPainelMinimizadoDesktop(true)
+                  dispararDica('Painel recolhido! Use o botão "◀ Linhas" no canto para reabrir.')
+                }}
+                title="Minimizar painel (ver mapa completo)"
+                aria-label="Minimizar painel de linhas"
+              >
+                ⇥
+              </button>
+            </div>
+
+            {/* Campo de pesquisa de linhas */}
+            <div className="campo-pesquisa-container">
+              <input
+                className="campo campo-busca-linha"
+                type="search"
+                placeholder="Buscar linha (ex: 101, Centro)..."
+                value={busca}
+                onChange={(e) => {
+                  setBusca(e.target.value)
+                  if (e.target.value) {
+                    dispararDica('Dica: Você pode digitar o número da linha ou o nome do bairro.')
+                  }
+                }}
+                aria-label="Buscar linha de ônibus"
+              />
+            </div>
+
+            {/* Filtros rápidos de status */}
+            <div className="filtros-status-tags">
+              <button
+                type="button"
+                className={`tag-filtro ${filtroStatus === 'todas' ? 'ativa' : ''}`}
+                onClick={() => setFiltroStatus('todas')}
+              >
+                Todas ({LINHAS.length})
+              </button>
+              <button
+                type="button"
+                className={`tag-filtro ${filtroStatus === 'operacao' ? 'ativa' : ''}`}
+                onClick={() => setFiltroStatus('operacao')}
+              >
+                Em operação ({LINHAS.filter((l) => l.status === 'operacao').length})
+              </button>
+            </div>
+
+            {/* Botão de ligar/desligar todas as linhas no mapa */}
+            <button
+              type="button"
+              className={`filtro-todas ${todasMarcadas ? 'marcada' : ''}`}
+              onClick={alternarTodas}
+              aria-pressed={todasMarcadas}
+            >
+              <span className="caixa" aria-hidden="true">
+                {todasMarcadas && '✓'}
+              </span>
+              <span className="texto-filtro">
+                <strong>{todasMarcadas ? 'Ocultar todas as rotas' : 'Exibir todas as rotas no mapa'}</strong>
+                <small>{todasMarcadas ? 'Clique para ver apenas os ônibus' : 'Toque para mostrar todos os trajetos'}</small>
+              </span>
+              <span className="icone-filtro">
+                <IconeOnibus cor="#1D1D1B" />
+              </span>
+            </button>
+
+            {/* Aviso quando nenhuma linha está marcada (Modo Limpo ativo) */}
+            {nenhumaMarcada && (
+              <div className="aviso-modo-limpo" role="status">
+                <span aria-hidden="true">🚌</span>
+                <p>
+                  <b>Modo limpo ativo:</b> Apenas a localização dos ônibus está visível no mapa. Marque a caixa de uma linha abaixo para traçar seu trajeto.
+                </p>
+              </div>
+            )}
+
+            {/* Lista dos cards de linhas */}
+            <ul className="lista-filtros">
+              {linhasFiltradas.map((linha) => {
+                const visivelNoMapa = linhasVisiveisIds.includes(linha.id)
+
+                return (
+                  <li key={linha.id} className="item-linha-card">
+                    <div
+                      className={`cartao-linha-interativo ${visivelNoMapa ? 'ativo-no-mapa' : ''}`}
+                      onClick={() => selecionarLinha(linha)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          selecionarLinha(linha)
+                        }
+                      }}
+                    >
+                      {/* Checkbox para ligar/desligar a rota desta linha */}
+                      <button
+                        type="button"
+                        className={`checkbox-visibilidade ${visivelNoMapa ? 'marcado' : ''}`}
+                        onClick={(e) => alternarLinhaVisibilidade(linha.id, e)}
+                        title={visivelNoMapa ? 'Ocultar trajeto desta linha' : 'Exibir trajeto desta linha no mapa'}
+                        aria-label={`Alternar visibilidade do trajeto da linha ${linha.codigo}`}
+                      >
+                        {visivelNoMapa ? '✓' : ''}
+                      </button>
+
+                      {/* Ícone com cor oficial da linha */}
+                      <span className="icone-linha-box" style={{ background: `${linha.cor}18` }}>
+                        <IconeOnibus cor={linha.cor} />
+                      </span>
+
+                      {/* Texto descritivo da linha */}
+                      <div className="linha-info-bloco">
+                        <div className="linha-nome-linha">
+                          <strong>{linha.codigo} — {linha.nome}</strong>
+                        </div>
+                        <div className="linha-subinfo">
+                          <span>{linha.tarifa}</span> ·{' '}
+                          <span>{linha.frequencia}</span>
+                        </div>
+                        <div className="linha-status-tempo">
+                          {linha.status === 'operacao' ? (
+                            <span className="tempo-onibus">
+                              🚌 Próximo em <b>{linha.proximoOnibus.previsao}</b>
+                            </span>
+                          ) : (
+                            <span className="fora-de-linha">Fora de operação</span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Botão de seta para detalhes */}
+                      <span className="seta-detalhes" aria-hidden="true">
+                        →
+                      </span>
+                    </div>
+                  </li>
+                )
+              })}
+
+              {linhasFiltradas.length === 0 && (
+                <li className="vazio">
+                  <span>🔍 Nenhuma linha encontrada para "{busca}".</span>
+                </li>
+              )}
+            </ul>
+
+            <hr className="divisor" />
+
+            {/* Checkbox de alertas de trânsito */}
+            <label className="filtro-alertas">
+              <input
+                type="checkbox"
+                checked={mostrarAlertas}
+                onChange={(e) => {
+                  setMostrarAlertas(e.target.checked)
+                  dispararDica(
+                    e.target.checked
+                      ? 'Dica: Alertas de trânsito e obras ativados no mapa.'
+                      : 'Dica: Alertas de trânsito foram ocultados.'
+                  )
+                }}
+              />
+              <span>Mostrar alertas de trânsito no mapa</span>
+            </label>
+
+            {/* Legenda do mapa */}
+            <div className="legenda-painel">
+              <span>
+                <i className="ponto-legend" style={{ background: '#1D1D1B' }} /> Ônibus
+              </span>
+              <span>
+                <i
+                  className="ponto-legend"
+                  style={{ background: '#fff', border: '2px solid #1D1D1B' }}
+                />{' '}
+                Ponto
+              </span>
+              <span>
+                <i className="ponto-legend" style={{ background: '#B3453A' }} /> Alerta
+              </span>
+              <span>
+                <i className="ponto-legend" style={{ background: '#2563EB' }} /> Você
+              </span>
+            </div>
+          </div>
+        )}
       </aside>
 
-      {/* Popup de detalhes da linha - sobre o mapa */}
-      {linhaDetalhe && (
-        <PopupDetalhesLinha
-          linha={linhaDetalhe}
-          onClose={() => setLinhaDetalhe(null)}
+      {/* -------------------------------------------------------------------------
+          POPUP MODAL: CENTRAL DE NOTIFICAÇÕES ("Tudo que tá rolando")
+      ------------------------------------------------------------------------- */}
+      {mostrarNotificacoes && (
+        <PopupNotificacoes
+          onClose={() => setMostrarNotificacoes(false)}
+          onLimparNaoLidas={() => setNotificacoesNaoLidas(0)}
+          onVerNoMapa={(coords) => {
+            setFocoCoords(coords)
+            dispararDica('Local da ocorrência focado no mapa.')
+          }}
         />
       )}
 
-      {/* Popup de denúncia - sobre o mapa */}
+      {/* -------------------------------------------------------------------------
+          POPUP MODAL: FORMULÁRIO DE DENÚNCIA / PERIGO
+      ------------------------------------------------------------------------- */}
       {mostrarDenuncia && (
         <PopupDenuncia
           onClose={() => setMostrarDenuncia(false)}
           onEnviar={handleDenunciaEnviada}
+          minhaPosicao={minhaPosicao}
+          linhaPreSelecionada={linhaSelecionada?.codigo}
         />
       )}
 
-      {/* Toast de dicas/notificações */}
-      {toast && (
+      {/* -------------------------------------------------------------------------
+          SISTEMA DE DICAS CONTEXTUAIS DINÂMICAS
+      ------------------------------------------------------------------------- */}
+      <DicaNotificacao
+        mensagem={dicaContextual}
+        onClose={() => setDicaContextual(null)}
+      />
+
+      {/* Toast de confirmação rápida */}
+      {toastMensagem && (
         <Toast
-          message={toast}
-          duration={5000}
-          onClose={() => setToast(null)}
+          message={toastMensagem}
+          duration={4000}
+          onClose={() => setToastMensagem(null)}
         />
       )}
     </div>

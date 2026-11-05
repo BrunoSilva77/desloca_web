@@ -38,3 +38,6 @@ vite.config.d.ts
 
 # Pasta de uploads: documentos originais da equipe (grandes, ficam locais)
 uploads/
+
+# Capturas de tela dos testes manuais (geradas pela automação de teste)
+testes/*.png
