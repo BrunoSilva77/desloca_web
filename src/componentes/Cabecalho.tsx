@@ -8,12 +8,12 @@ import { useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import logoD from '../assets/logo-d.jpg'
 
+// Links do menu: Denúncias e Dicas saíram da navegação porque agora vivem
+// dentro do mapa (botão flutuante de denúncia e dicas contextuais).
 const LINKS = [
   { to: '/', nome: 'Início' },
   { to: '/mapa', nome: 'Mapa & Linhas' },
   { to: '/acessibilidade', nome: 'Acessibilidade' },
-  { to: '/mapa?acao=denuncia', nome: 'Denúncias' },
-  { to: '/dicas', nome: 'Dicas' },
   { to: '/indice-movida', nome: 'Índice MOVIDA' },
 ]
 
@@ -25,15 +25,10 @@ export default function Cabecalho() {
     setMenuAberto(false)
   }
 
-  // Verifica se o link do mapa está ativo (inclusive para denúncias no mapa)
+  // Marca como ativo o link da página que está aberta no momento
   const isLinkAtivo = (to: string) => {
     if (to === '/') return location.pathname === '/'
-    if (to.includes('?acao=denuncia')) {
-      return location.pathname === '/mapa' && location.search.includes('acao=denuncia')
-    }
-    if (to === '/mapa') {
-      return location.pathname === '/mapa' && !location.search.includes('acao=denuncia')
-    }
+    if (to === '/mapa') return location.pathname === '/mapa'
     return location.pathname.startsWith(to)
   }
 

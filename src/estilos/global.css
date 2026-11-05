@@ -74,7 +74,7 @@ input:focus-visible {
   border-bottom: 1px solid var(--cinza-claro);
   position: sticky; /* Fica fixo no topo ao rolar a página */
   top: 0;
-  z-index: 1000;
+  z-index: 1200; /* Acima dos painéis flutuantes do mapa (1000–1050) */
   min-height: 62px;
 }
 
@@ -340,10 +340,10 @@ input:focus-visible {
 /* ---------------------------------------------------------------------------
    PÁGINA DO MAPA EM TELA CHEIA
    --------------------------------------------------------------------------- */
-/* Estrutura: o mapa ocupa toda a área abaixo do cabeçalho */
+/* Estrutura: o mapa ocupa toda a área abaixo do cabeçalho (63px com borda) */
 .tela-mapa {
   position: relative; /* Ancora o painel flutuante dentro desta área */
-  height: calc(100vh - 62px); /* Altura total menos a altura do cabeçalho */
+  height: calc(100vh - 63px); /* Altura total menos a altura do cabeçalho */
   min-height: 480px;
   overflow: hidden;
 }
@@ -812,6 +812,13 @@ textarea.campo {
 
 .rodape strong {
   color: var(--branco);
+}
+
+/* Rodapé escondido na tela cheia do mapa: ele empurra a altura da página para
+   além da viewport, criando rolagem. Com rolagem, o painel flutuante passa por
+   cima do cabeçalho fixo quando o usuário desce a página. */
+.tela-mapa-unificada + .rodape {
+  display: none;
 }
 
 /* ---------------------------------------------------------------------------
@@ -1645,7 +1652,7 @@ textarea.campo {
 /* Estrutura da tela cheia do mapa unificado */
 .tela-mapa-unificada {
   position: relative;
-  height: calc(100vh - 62px);
+  height: calc(100vh - 63px);
   min-height: 480px;
   width: 100%;
   overflow: hidden;
