@@ -100,9 +100,11 @@ export default function Inicio() {
           HERO: mapa da cidade desfocado ao vivo por trás do texto
       ===================================================================== */}
       <section className="inicio-hero">
-        {/* Mapa real (Leaflet) com os ônibus andando, usado só como pano de fundo */}
+        {/* Mapa real (Leaflet) com os ônibus andando, usado só como pano de fundo.
+            Passa as rotas também: sem elas o hero ficava só com marcadores
+            empilhados no Terminal, sem contexto de cidade */}
         <div className="inicio-hero-mapa" aria-hidden="true">
-          <MapaDesloca todasLinhas={LINHAS} />
+          <MapaDesloca todasLinhas={LINHAS} linhasComTrajeto={LINHAS} />
         </div>
 
         {/* Veu escuro por cima do mapa para o texto ficar legível */}

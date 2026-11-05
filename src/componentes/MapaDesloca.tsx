@@ -50,6 +50,10 @@ function metrosEntre(a: [number, number], b: [number, number]) {
   return 2 * RAIO * Math.asin(Math.sqrt(h))
 }
 
+// Chave gratuita da conta CARTO do protótipo (limite de 5 mi de requisições
+// por mês). Os tiles precisam dela desde a nova política de uso do CARTO.
+const CHAVE_CARTO = 'cb1_52g8_1_d6d05b7fda1b26f7fe11d825'
+
 // Coordenada do Terminal Urbano Nelson Reis Alves: origem e destino de
 // todas as rotas simuladas da apresentação
 const COORD_TERMINAL: [number, number] = [-21.203169, -50.4385078]
@@ -83,12 +87,13 @@ function iconeOnibus(cor: string) {
 }
 
 function iconePonto(destaque = false) {
-  const tam = destaque ? 18 : 14
+  // Pontos pequenos e discretos: a parada destaca (maior) só na linha ativa
+  const tam = destaque ? 14 : 10
   return L.divIcon({
     className: 'marcador-ponto', // classe própria para os testes contarem os pontos
     html: `<div style="
       background:${destaque ? '#C9A882' : '#fff'};width:${tam}px;height:${tam}px;border-radius:50%;
-      border:3px solid #1D1D1B;box-shadow:0 1px 4px rgba(0,0,0,.3);transition:transform .2s"></div>`,
+      border:2px solid #1D1D1B;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s"></div>`,
     iconSize: [tam, tam],
     iconAnchor: [tam / 2, tam / 2],
   })
@@ -165,13 +170,15 @@ export default function MapaDesloca({
       setTimeout(() => mapa.invalidateSize(), 250)
     }
 
-    // Tiles leves do CARTO (Positron): fundo cinza-claro, sem poluição visual
-    // — rotas e ônibus aparecem com muito mais destaque que no OSM padrão
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      subdomains: 'abcd',
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap &copy; CARTO',
-    }).addTo(mapa)
+    // Tiles CARTO (estilo Voyager): fundo claro e enxuto, com a chave da
+    // conta gratuita — sem a chave o CARTO devolve "API KEY REQUIRED"
+    L.tileLayer(
+      `https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=${CHAVE_CARTO}`,
+      {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap &copy; CARTO',
+      }
+    ).addTo(mapa)
 
     camadaTrajetosRef.current = L.layerGroup().addTo(mapa)
     camadaAlertasRef.current = L.layerGroup().addTo(mapa)
@@ -358,12 +365,12 @@ export default function MapaDesloca({
     linhasParaDesenhar.forEach((linha) => {
       const ativa = linhaAtiva?.id === linha.id
 
-      // Trajeto da linha (polilinha)
+      // Estilo enxuto para não poluir: ativa grossa e forte, as demais bem
+      // finas e translúcidas (sem tracejado, que só bagunçava o visual)
       const polyline = L.polyline(linha.trajeto, {
         color: linha.cor,
-        weight: ativa ? 7 : 4,
-        opacity: ativa ? 1 : linhaAtiva ? 0.25 : 0.7,
-        dashArray: ativa ? undefined : '6 6',
+        weight: ativa ? 5 : 2.5,
+        opacity: ativa ? 1 : linhaAtiva ? 0.28 : 0.6,
       }).addTo(camadaTrajetos)
 
       if (onLinhaClick) {

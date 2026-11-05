@@ -26,6 +26,13 @@ with sync_playwright() as p:
     pagina.on("pageerror", lambda e: erros.append(str(e)))
     pagina.on("console", lambda m: erros.append(m.text) if m.type == "error" else None)
 
+    # Status HTTP dos tiles do CARTO: chave inválida devolve 401/403
+    status_carto = []
+    pagina.on(
+        "response",
+        lambda r: status_carto.append(r.status) if "rastertiles" in r.url else None,
+    )
+
     pagina.goto("http://localhost:5173/mapa")
     pagina.wait_for_load_state("networkidle")
     pagina.wait_for_timeout(1500)
@@ -63,9 +70,11 @@ with sync_playwright() as p:
         "() => document.querySelectorAll('.marcador-ponto').length"
     )
 
-    carto_ok = all("cartocdn.com" in src for src in tiles) and bool(tiles)
+    carto_ok = all("cartocdn.com" in src and "key=" in src for src in tiles) and bool(tiles)
+    carto_http_ok = bool(status_carto) and all(s == 200 for s in status_carto)
 
-    print(f"tiles CARTO: {carto_ok} | exemplo: {tiles[:1]}")
+    print(f"tiles CARTO: {carto_ok} | http 200: {carto_http_ok} "
+          f"({len(status_carto)} tiles) | exemplo: {tiles[:1]}")
     print(f"onibus no mapa: {n_onibus} (esperado 4)")
     print(f"terminal visivel: {tem_terminal}")
     print(f"rotas desenhadas (paths SVG): {n_rotas} (esperado >= 4)")
@@ -74,7 +83,8 @@ with sync_playwright() as p:
     print(f"pontos apos selecionar linha 1: {n_pontos_ativa} (esperado 13)")
     print(f"erros de console (mapa): {erros if erros else 'nenhum'}")
 
-    assert carto_ok, "tiles nao sao do CARTO"
+    assert carto_ok, "tiles nao sao do CARTO com chave"
+    assert carto_http_ok, f"tiles do CARTO fora de 200: {status_carto[:5]}"
     assert n_onibus == 4, f"esperava 4 onibus, achei {n_onibus}"
     assert tem_terminal, "marcador do Terminal ausente"
     assert n_rotas >= 4, f"esperava >= 4 rotas, achei {n_rotas}"
@@ -108,7 +118,10 @@ with sync_playwright() as p:
     onibus_home = pagina2.evaluate(
         "() => document.querySelectorAll('.inicio-hero-mapa .marcador-onibus-animado').length"
     )
-    carto_home = all("cartocdn.com" in src for src in tiles_home) and bool(tiles_home)
+    carto_home = (
+        all("cartocdn.com" in src and "key=" in src for src in tiles_home)
+        and bool(tiles_home)
+    )
     print(f"home: tiles CARTO {carto_home} | onibus no hero: {onibus_home}")
     print(f"erros de console (home): {erros2 if erros2 else 'nenhum'}")
     assert carto_home, "home nao esta com tiles do CARTO"
