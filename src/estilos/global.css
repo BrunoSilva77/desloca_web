@@ -757,33 +757,300 @@ textarea.campo {
 }
 
 /* ---------------------------------------------------------------------------
-   PÁGINA INICIAL - destaque e atalhos
+   PÁGINA INICIAL — HERO COM MAPA DESFOCADO, NÚMEROS E PASSOS
    --------------------------------------------------------------------------- */
-.destaque {
-  background: var(--preto);
+/* Página inteira sem max-width: o hero ocupa a largura total do viewport */
+.inicio-pagina {
+  width: 100%;
+}
+
+/* Hero: mapa real da cidade desfocado atrás do texto de boas-vindas */
+.inicio-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 560px;
+  display: flex;
+  align-items: center;
+  background: var(--preto); /* Base caso os tiles do mapa não carreguem */
+}
+
+/* Camada do Leaflet: desfocada e com ponta escondida fora da tela para o
+   blur não revelar as bordas do mapa */
+.inicio-hero-mapa {
+  position: absolute;
+  inset: -30px;
+  filter: blur(9px) saturate(1.15);
+  transform: scale(1.05);
+  pointer-events: none; /* É pano de fundo: cliques passam direto */
+  opacity: 0.95;
+}
+
+/* O mapa preenche toda a área do hero e perde o visual de "cartão" */
+.inicio-hero-mapa .mapa {
+  height: 100%;
+  border: none;
+  border-radius: 0;
+  background: #e8e4de;
+}
+
+/* Controles do Leaflet não fazem sentido sobre o fundo desfocado */
+.inicio-hero-mapa .leaflet-control-container {
+  display: none;
+}
+
+/* Veu escuro com gradiente: texto sempre legível, mapa aparece mais à direita */
+.inicio-hero-veu {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      100deg,
+      rgba(29, 29, 27, 0.94) 0%,
+      rgba(29, 29, 27, 0.82) 42%,
+      rgba(29, 29, 27, 0.45) 100%
+    ),
+    linear-gradient(0deg, rgba(29, 29, 27, 0.65) 0%, transparent 42%);
+}
+
+/* Conteúdo do hero alinhado ao mesmo eixo das outras páginas (1200px) */
+.inicio-hero-conteudo {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 76px 24px;
+}
+
+/* Selo "Ao vivo": pill translúcida com ponto verde pulsando */
+.inicio-selo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(250, 248, 244, 0.12);
+  border: 1px solid rgba(250, 248, 244, 0.28);
+  color: #f2eee8;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  backdrop-filter: blur(6px);
+}
+
+.inicio-selo-ponto {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #7fbf8f;
+  animation: pulsaPonto 2s infinite;
+}
+
+@keyframes pulsaPonto {
+  0% {
+    box-shadow: 0 0 0 0 rgba(127, 191, 143, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 9px rgba(127, 191, 143, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(127, 191, 143, 0);
+  }
+}
+
+.inicio-hero h1 {
   color: var(--branco);
-  border-radius: calc(var(--raio) + 8px);
-  padding: 44px 36px;
-  margin-bottom: 32px;
-}
-
-.destaque h1 {
-  font-size: clamp(2rem, 5vw, 3rem);
+  font-size: clamp(2.2rem, 5.5vw, 3.6rem);
   font-weight: 800;
-  letter-spacing: -1.5px;
-  line-height: 1.1;
-  max-width: 16ch;
+  letter-spacing: -2px;
+  line-height: 1.06;
+  margin-top: 18px;
+  max-width: 17ch;
 }
 
-.destaque p {
-  color: #b8b5b0;
-  margin: 14px 0 24px;
-  max-width: 52ch;
+/* Destaque do slogan na cor bege da marca */
+.inicio-destaque {
+  color: var(--bege);
 }
 
-.destaque .botao {
+.inicio-hero p {
+  color: #cfcac2;
+  max-width: 54ch;
+  margin: 16px 0 28px;
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.inicio-hero-botoes {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.inicio-botao-primario {
   background: var(--bege);
   color: var(--preto);
+}
+
+.inicio-botao-secundario {
+  background: transparent;
+  color: var(--branco);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+}
+
+.inicio-botao-secundario:hover {
+  background: rgba(255, 255, 255, 0.12);
+  opacity: 1;
+}
+
+/* Crédito nítido do mapa (o controle do Leaflet fica escondido no blur) */
+.inicio-hero-creditos {
+  position: absolute;
+  right: 14px;
+  bottom: 10px;
+  z-index: 2;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* Faixa de números que encosta no rodapé do hero */
+.inicio-numeros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+  margin-top: -46px; /* Sobre o hero: sensação de camadas */
+  position: relative;
+  z-index: 3;
+}
+
+.inicio-numero {
+  background: var(--branco);
+  border: 1px solid var(--cinza-claro);
+  border-radius: var(--raio);
+  padding: 20px 22px;
+  box-shadow: var(--sombra);
+}
+
+.inicio-numero strong {
+  display: block;
+  font-size: clamp(1.9rem, 3vw, 2.5rem);
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: var(--preto);
+  line-height: 1;
+}
+
+.inicio-numero span {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--preto);
+}
+
+.inicio-numero small {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--cinza);
+}
+
+/* Seções de conteúdo abaixo do hero */
+.inicio-secao {
+  margin-top: 48px;
+}
+
+.inicio-secao .titulo-pagina {
+  margin-bottom: 18px;
+}
+
+/* Cartão de atalho com setinha indicando navegação */
+.inicio-atalho {
+  position: relative;
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.inicio-atalho-seta {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  color: var(--cinza);
+  font-size: 1rem;
+  transition: transform 0.2s, color 0.2s;
+}
+
+.inicio-atalho:hover .inicio-atalho-seta {
+  transform: translateX(4px);
+  color: var(--preto);
+}
+
+/* Bloco "como funciona": três passos numerados */
+.inicio-passos {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.inicio-passo {
+  background: var(--creme);
+  border: 1px solid var(--cinza-claro);
+  border-radius: var(--raio);
+  padding: 22px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.inicio-passo:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--sombra);
+}
+
+.inicio-passo-numero {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--preto);
+  color: var(--bege);
+  font-weight: 800;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inicio-passo h3 {
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.inicio-passo p {
+  font-size: 0.88rem;
+  color: var(--cinza);
+  line-height: 1.5;
+}
+
+/* Animação de entrada usada em bloco .animar (com delay no estilo inline) */
+.animar {
+  opacity: 0;
+  animation: sobeClaro 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes sobeClaro {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Ícone circular usado nos atalhos da home */
@@ -837,8 +1104,16 @@ textarea.campo {
     padding: 10px 16px;
   }
 
-  .destaque {
-    padding: 30px 20px;
+  .inicio-hero {
+    min-height: 480px;
+  }
+
+  .inicio-hero-conteudo {
+    padding: 56px 20px;
+  }
+
+  .inicio-numeros {
+    margin-top: -36px;
   }
 
   .mapa {
@@ -855,8 +1130,27 @@ textarea.campo {
     font-size: 1.7rem;
   }
 
-  .destaque h1 {
-    font-size: 1.8rem;
+  .inicio-hero {
+    min-height: 460px;
+  }
+
+  .inicio-hero h1 {
+    font-size: 1.9rem;
+    letter-spacing: -1px;
+  }
+
+  .inicio-hero p {
+    font-size: 0.98rem;
+  }
+
+  /* Botões do hero um embaixo do outro, com alinhamento centralizado */
+  .inicio-hero-botoes .botao {
+    flex: 1 1 100%;
+    text-align: center;
+  }
+
+  .inicio-numeros {
+    margin-top: -30px;
   }
 }
 

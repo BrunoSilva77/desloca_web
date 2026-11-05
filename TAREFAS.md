@@ -59,6 +59,14 @@ git push
 - [x] **04/11** — **Acessibilidade** reescrita com busca, filtros e rotas (da equipe)
 - [x] **04/11** — CSS unido: **comentários em português mantidos** + estilos novos
       da equipe (785 linhas) — zero conflito de código, só de comentário
+- [x] **04/11** — **Sobreposição painel × cabeçalho** corrigida no mapa: rodapé
+      escondido na tela cheia (gerava rolagem), z-index do cabeçalho subiu para
+      1200 e alturas em `calc(100vh - 63px)` — verificado com Playwright
+- [x] **04/11** — **Novo Início**: hero com mapa da cidade desfocado ao vivo
+      (Leaflet + ônibus andando), animações de entrada escalonadas, contadores
+      animados (linhas/alertas/pontos) e bloco "Como funciona"
+- [x] **04/11** — **Auditoria de responsividade** em 5 rotas × 375px e 768px
+      (`testes/auditoria_responsividade.py`): zero rolagem horizontal
 
 ---
 
@@ -81,7 +89,8 @@ git push
       (simulado com `setInterval`, depois trocado por WebSocket)
 - [ ] **Página de detalhes da linha** com todos os horários
 - [ ] **Busca por origem/destino** (estilo Uber: "de → para")
-- [ ] **Responsividade no celular** — testar todas as telas em 375px
+- [x] **Responsividade no celular** — auditoria automática em 375px/768px em
+      todas as telas (`testes/auditoria_responsividade.py`), sem rolagem horizontal
 - [ ] **Testar localização no celular real** (o `getCurrentPosition` é diferente)
 - [ ] **Comentários nos estilos novos** da Acessibilidade/Índice MOVIDA — a equipe
       deixou só o cabeçalho de seção; falta comentar propriedade por propriedade
