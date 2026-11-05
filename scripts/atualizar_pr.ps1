@@ -1,4 +1,6 @@
-# Atualiza o PR aberto #1 do repositorio Desloca (titulo + descricao)
+# Sincroniza a descricao do PR #1 (ja merged) no GitHub.
+# O PR #1 e o da equipe ("juncao da branch inicial com a branch Main");
+# como o trabalho todo foi mergeado por ele, a descricao documenta o conteudo.
 # Uso: powershell -ExecutionPolicy Bypass -File scripts\atualizar_pr.ps1
 $saida = "host=github.com`nprotocol=https`n" | git credential fill 2>$null
 $token = ($saida | Where-Object { $_ -like 'password=*' }) -replace 'password=',''
@@ -14,9 +16,9 @@ $headers = @{
 }
 
 $corpo = @'
-Prototipo navegavel do Desloca (Fatec Aracatuba) - 12 commits, do scaffold ate a simulacao de apresentacao.
+Prototipo navegavel do Desloca (Fatec Aracatuba) - simulacao de apresentacao completa.
 
-### Mapa de apresentacao (simulacao completa)
+### Mapa de apresentacao (simulacao)
 - **4 linhas simuladas** saindo do Terminal Urbano Nelson Reis Alves, cobrindo todos os bairros urbanos (max. 2 linhas/bairro) e pontos importantes (Shoppings, Havan, Museu da Cidade, Aeroporto)
 - **Trajetos reais das ruas** gerados via OSRM (`scripts/gerar_rotas_apresentacao.py` -> `src/dados/trajetos.json`)
 - **Relogio simulado acelerado** (14:18, 10x mais rapido) com chip no topo do mapa
@@ -36,10 +38,9 @@ Prototipo navegavel do Desloca (Fatec Aracatuba) - 12 commits, do scaffold ate a
 '@
 
 $dados = @{
-  title = 'feat: prototipo navegavel do Desloca com simulacao de onibus e horarios'
+  title = 'juncao da branch inicial com a branch Main'
   body  = $corpo
 } | ConvertTo-Json -Depth 4
-
 $utf8 = [System.Text.Encoding]::UTF8.GetBytes($dados)
 
 try {
@@ -51,14 +52,13 @@ try {
     -ContentType 'application/json; charset=utf-8'
   Write-Output ('PR atualizado: ' + $pr.html_url)
   Write-Output ('titulo: ' + $pr.title)
-  Write-Output ('estado: ' + $pr.state + ' | base: ' + $pr.base.ref + ' <- head: ' + $pr.head.ref)
-  Write-Output ('commits: ' + $pr.commits + ' | arquivos: ' + $pr.changed_files)
+  Write-Output ('estado: ' + $pr.state + ' | merged: ' + $pr.merged)
 }
 catch {
-  Write-Output ('ERRO: ' + $_.Exception.Message)
-  if ($_.Exception.Response) {
-    $leitor = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
-    Write-Output $leitor.ReadToEnd()
+  $erro = $_
+  Write-Output ('ERRO: ' + $erro.Exception.Message)
+  if ($erro.ErrorDetails -and $erro.ErrorDetails.Message) {
+    Write-Output ('DETALHE: ' + $erro.ErrorDetails.Message)
   }
   exit 1
 }
