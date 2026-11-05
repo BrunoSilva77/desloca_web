@@ -5,8 +5,11 @@
 // No futuro, este conteúdo virá do backend (banco MySQL + API REST).
 //
 // Os TRAJETOS das linhas vêm do arquivo trajetos.json, que foi gerado pela
-// API pública do OSRM (scripts/gerar_trajetos.py). Assim o caminho do ônibus
-// segue as ruas de verdade, em vez de linhas retas atravessando quarteirões.
+// API pública do OSRM (scripts/gerar_rotas_apresentacao.py). Assim o caminho do
+// ônibus segue as ruas de verdade, em vez de linhas retas atravessando quarteirões.
+// IMPORTANTE: são rotas SIMULADAS para a apresentação — todas saem do Terminal
+// Urbano Nelson Reis Alves, passam por bairros e pontos importantes da cidade
+// e voltam ao terminal (volta completa de poucos minutos na animação).
 // =============================================================================
 
 // Importa os trajetos gerados (formato: { "101": { trajeto: [...], ... } })
@@ -24,6 +27,7 @@ export type Linha = {
   status: 'operacao' | 'fora' // Se está rodando ou não
   trajeto: [number, number][] // Lista de coordenadas [latitude, longitude] do caminho
   pontos: { nome: string; coords: [number, number] }[] // Paradas da linha
+  duracaoVoltaMin: number // Duração da volta completa na simulação (minutos)
   proximoOnibus: {
     placa: string
     posicao: [number, number] // Onde o ônibus está agora
@@ -39,84 +43,64 @@ export const CENTRO_ARACATUBA: [number, number] = [-21.2087, -50.4347]
 // Monta a lista de linhas juntando as informações manuais (abaixo) com o
 // trajeto real vindo do OSRM.
 // -----------------------------------------------------------------------------
-// Informações cadastrais de cada linha (o que muda pouco)
+// Informações cadastrais de cada linha (o que muda pouco).
+// As 4 linhas saem do Terminal e juntas cobrem todos os bairros urbanos,
+// com no máximo 2 linhas por bairro (na prática, cada bairro pertence a 1).
 const CADASTRO = [
   {
     id: 1,
     codigo: '101',
-    nome: 'Circular Centro',
+    nome: 'Circular Norte',
     cor: '#1D1D1B',
     tarifa: 'R$ 5,00',
     frequencia: 'a cada 10 minutos',
     status: 'operacao' as const,
-    nomesPontos: [
-      'Terminal Central',
-      'Av. Bandeirantes',
-      'Praça da Bandeira',
-      'Av. dos Estados',
-      'Rodoviária',
-    ],
     proximoOnibus: {
       placa: 'ABC-1D23',
       lotacao: 'medio' as const,
-      previsao: '4 min',
+      previsao: '6 min',
     },
   },
   {
     id: 2,
     codigo: '202',
-    nome: 'Vila Mineira - Centro',
+    nome: 'Circular Oeste',
     cor: '#C9A882',
     tarifa: 'R$ 5,00',
-    frequencia: 'a cada 20 minutos',
+    frequencia: 'a cada 12 minutos',
     status: 'operacao' as const,
-    nomesPontos: [
-      'Vila Mineira',
-      'Jardim Bandeirantes',
-      'Hospital Regional',
-      'Mercado Municipal',
-      'Terminal Central',
-    ],
     proximoOnibus: {
       placa: 'EFG-4H56',
       lotacao: 'cheio' as const,
-      previsao: '11 min',
+      previsao: '4 min',
     },
   },
   {
     id: 3,
     codigo: '303',
-    nome: 'Aeroporto - Terminal',
+    nome: 'Circular Sul',
     cor: '#4F7A5A',
-    tarifa: 'R$ 6,50',
-    frequencia: 'a cada 30 minutos',
+    tarifa: 'R$ 5,00',
+    frequencia: 'a cada 15 minutos',
     status: 'operacao' as const,
-    nomesPontos: [
-      'Aeroporto',
-      'Zona Sul',
-      'Av. Odorindo Perenha',
-      'Centro',
-      'Terminal Central',
-    ],
     proximoOnibus: {
       placa: 'IJK-7L89',
-      lotacao: 'vazio' as const,
-      previsao: '18 min',
+      lotacao: 'medio' as const,
+      previsao: '9 min',
     },
   },
   {
     id: 4,
     codigo: '404',
-    nome: 'Circular Zona Norte',
+    nome: 'Centro e Aeroporto',
     cor: '#8C6A4F',
-    tarifa: 'R$ 5,00',
-    frequencia: 'a cada 25 minutos',
-    status: 'fora' as const, // Linha fora de operação (exibe aviso no mapa)
-    nomesPontos: ['Zona Norte', 'Jardim Brasil', 'Shopping', 'Escola Técnica', 'Parque Industrial'],
+    tarifa: 'R$ 6,50',
+    frequencia: 'a cada 15 minutos',
+    status: 'operacao' as const,
     proximoOnibus: {
       placa: 'MNO-0P12',
       lotacao: 'vazio' as const,
-      previsao: '—',
+      previsao: '7 min',
     },
   },
 ]
@@ -127,8 +111,10 @@ type TrajetosJson = Record<
   {
     trajeto: [number, number][]
     paradas: [number, number][]
+    paradas_nomes?: string[]
     distancia_km: number
     duracao_min: number
+    duracao_volta_min: number
   }
 >
 
@@ -148,15 +134,17 @@ export const LINHAS: Linha[] = CADASTRO.map((linha) => {
     status: linha.status,
     // Se não existir trajeto gerado, fica vazio (a tela trata isso)
     trajeto: rota?.trajeto ?? [],
-    // Cria os pontos usando as coordenadas das paradas do trajeto real
+    // Paradas da rota com o nome real do ponto (vem do gerador de rotas)
     pontos: (rota?.paradas ?? []).map((coords, indice) => ({
-      nome: linha.nomesPontos[indice] ?? `Ponto ${indice + 1}`,
+      nome: rota?.paradas_nomes?.[indice] ?? `Ponto ${indice + 1}`,
       coords,
     })),
+    // Duração da volta completa na simulação (usada pela animação do mapa)
+    duracaoVoltaMin: rota?.duracao_volta_min ?? 6,
     proximoOnibus: {
       placa: linha.proximoOnibus.placa,
-      // Coloca o ônibus no meio do trajeto (posição simulada)
-      posicao: rota?.trajeto[Math.floor((rota?.trajeto.length ?? 0) / 2)] ?? [-21.2087, -50.4347],
+      // Ônibus começa NO TERMINAL: a simulação o faz sair e dar a volta
+      posicao: rota?.trajeto[0] ?? [-21.203169, -50.4385078],
       lotacao: linha.proximoOnibus.lotacao,
       previsao: linha.proximoOnibus.previsao,
     },
@@ -179,9 +167,9 @@ export const ALERTAS: Alerta[] = [
   {
     id: 1,
     tipo: 'transito',
-    titulo: 'Trânsito intenso na Av. Bandeirantes',
+    titulo: 'Trânsito intenso na Av. dos Araçás',
     descricao: 'Congestionamento devido à alta movimentação no horário de pico.',
-    coords: [-21.216, -50.428],
+    coords: [-21.2024, -50.4307], // Av. dos Araçás (linha 404)
     horario: '08:10',
   },
   {
@@ -189,15 +177,15 @@ export const ALERTAS: Alerta[] = [
     tipo: 'acidente',
     titulo: 'Colisão entre dois veículos',
     descricao: 'Faixa direita bloqueada. Ônibus desviando pela rua paralela.',
-    coords: [-21.222, -50.422],
+    coords: [-21.2179, -50.4471], // Morumbi (linha 303)
     horario: '07:45',
   },
   {
     id: 3,
     tipo: 'obra',
-    titulo: 'Reforma no ponto da Rodoviária',
-    descricao: 'Ponto temporariamente deslocado para em frente ao mercado.',
-    coords: [-21.204, -50.437],
+    titulo: 'Reforma no ponto em frente ao Shopping',
+    descricao: 'Ponto temporariamente deslocado para a entrada principal.',
+    coords: [-21.2118, -50.4698], // Shopping Araçatuba (linha 202)
     horario: 'Ontem',
   },
   {
@@ -205,7 +193,7 @@ export const ALERTAS: Alerta[] = [
     tipo: 'clima',
     titulo: 'Chuva forte prevista para a tarde',
     descricao: 'Possível atraso nas linhas a partir das 14h.',
-    coords: [-21.2087, -50.4347],
+    coords: [-21.2032, -50.4385], // Terminal Urbano (ponto de partida)
     horario: '12:00',
   },
 ]
@@ -216,15 +204,15 @@ export const ALERTAS: Alerta[] = [
 export const ROTAS_ACESSIVEIS = [
   {
     id: 1,
-    origem: 'Terminal Central',
-    destino: 'Hospital Regional',
+    origem: 'Terminal Urbano',
+    destino: 'Hospital Unimed',
     detalhes: 'Com calçada acessível, sem degraus e com semáforo sonoro.',
     tempo: '18 min',
   },
   {
     id: 2,
-    origem: 'Vila Mineira',
-    destino: 'Praça da Bandeira',
+    origem: 'Shopping Araçatuba',
+    destino: 'Parque Ecológico Baguaçu',
     detalhes: 'Rota com elevador na passarela e piso tátil em todo o trajeto.',
     tempo: '25 min',
   },

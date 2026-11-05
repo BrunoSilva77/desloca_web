@@ -67,6 +67,19 @@ git push
       animados (linhas/alertas/pontos) e bloco "Como funciona"
 - [x] **04/11** — **Auditoria de responsividade** em 5 rotas × 375px e 768px
       (`testes/auditoria_responsividade.py`): zero rolagem horizontal
+- [x] **04/11** — **Rotas simuladas de apresentação**: 4 linhas saem do Terminal
+      Urbano Nelson Reis Alves, cobrem todos os bairros urbanos (máx. 2 linhas
+      por bairro) e passam por shoppings, Havan, museus, estádio, parques,
+      hospital e aeroporto — rotas em rua real via OSRM
+      (`scripts/gerar_rotas_apresentacao.py`, geocodificação em
+      `scripts/buscar_bairros.py` e `scripts/buscar_pois.py`)
+- [x] **04/11** — **Ônibus andando de verdade**: animação em loop pelo trajeto
+      com saída escalonada do Terminal (25s entre cada) e volta completa de
+      6,5 a 8 minutos; verificado com Playwright (4/4 veículos em movimento)
+- [x] **04/11** — **Mapa mais limpo**: tiles CARTO Positron (fundo claro, sem
+      poluição visual), marcador fixo do Terminal, pontos de parada só da linha
+      ativa e enquadramento automático da rede de rotas
+      (`testes/verificar_rotas_apresentacao.py`)
 
 ---
 

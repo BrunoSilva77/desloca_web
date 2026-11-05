@@ -59,7 +59,9 @@ export default function Mapa() {
   const [filtroStatus, setFiltroStatus] = useState<'todas' | 'operacao'>('todas')
 
   // Linhas cujos trajetos e pontos serão desenhados no mapa (vazio = modo limpo, só ônibus andando!)
-  const [linhasVisiveisIds, setLinhasVisiveisIds] = useState<number[]>([])
+  // Por padrão TODAS as rotas aparecem (a apresentação já abre com as 4
+  // linhas desenhadas); desmarcar entra no modo limpo
+  const [linhasVisiveisIds, setLinhasVisiveisIds] = useState<number[]>(LINHAS.map((l) => l.id))
 
   const [mostrarAlertas, setMostrarAlertas] = useState(true)
 

@@ -5,6 +5,7 @@
 // =============================================================================
 
 import { useState, useEffect, type FormEvent } from 'react'
+import { LINHAS } from '../dados/linhas'
 
 export interface DadosDenuncia {
   tipo: string
@@ -176,10 +177,12 @@ export default function PopupDenuncia({
                 onChange={(e) => setLinhaId(e.target.value)}
               >
                 <option value="">Não sei ou ocorrência geral na via</option>
-                <option value="101">101 — Circular Centro</option>
-                <option value="202">202 — Vila Mineira - Centro</option>
-                <option value="303">303 — Aeroporto - Terminal</option>
-                <option value="404">404 — Circular Zona Norte</option>
+                {/* Linhas vêm dos dados: se uma rotas mudar, o select acompanha */}
+                {LINHAS.map((linha) => (
+                  <option key={linha.codigo} value={linha.codigo}>
+                    {linha.codigo} — {linha.nome}
+                  </option>
+                ))}
               </select>
             </div>
 
