@@ -13,6 +13,11 @@ import { useEffect, useRef } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import type { Linha } from '../dados/linhas'
+import {
+  desdeUltimaPartida,
+  formatarRelogio,
+  proximaPartida,
+} from '../utilidades/relogioSimulado'
 
 type AlertaItem = {
   coords: [number, number]
@@ -50,13 +55,19 @@ function metrosEntre(a: [number, number], b: [number, number]) {
   return 2 * RAIO * Math.asin(Math.sqrt(h))
 }
 
-// Chave gratuita da conta CARTO do protótipo (limite de 5 mi de requisições
-// por mês). Os tiles precisam dela desde a nova política de uso do CARTO.
-const CHAVE_CARTO = 'cb1_52g8_1_d6d05b7fda1b26f7fe11d825'
-
 // Coordenada do Terminal Urbano Nelson Reis Alves: origem e destino de
 // todas as rotas simuladas da apresentação
 const COORD_TERMINAL: [number, number] = [-21.203169, -50.4385078]
+
+// "Vagas" do Terminal: pequenos deslocamentos em volta do ponto de partida,
+// um por linha. Quando o ônibus não está em rota, ele fica parado na SUA vaga
+// (assim os 4 veículos não se empilham em cima do mesmo marcador).
+const VAGAS: Record<number, [number, number]> = {
+  1: [COORD_TERMINAL[0] + 0.0007, COORD_TERMINAL[1] + 0.0004],
+  2: [COORD_TERMINAL[0] + 0.0007, COORD_TERMINAL[1] - 0.0004],
+  3: [COORD_TERMINAL[0] - 0.0007, COORD_TERMINAL[1] + 0.0004],
+  4: [COORD_TERMINAL[0] - 0.0007, COORD_TERMINAL[1] - 0.0004],
+}
 
 function iconeTerminal() {
   return L.divIcon({
@@ -170,13 +181,14 @@ export default function MapaDesloca({
       setTimeout(() => mapa.invalidateSize(), 250)
     }
 
-    // Tiles CARTO (estilo Voyager): fundo claro e enxuto, com a chave da
-    // conta gratuita — sem a chave o CARTO devolve "API KEY REQUIRED"
+    // Tiles Esri World Street Map: visual próximo do Google Maps (ruas com
+    // nome, contraste bom, sem poluição de POIs), gratuito e sem chave de API
     L.tileLayer(
-      `https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=${CHAVE_CARTO}`,
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
       {
         maxZoom: 19,
-        attribution: '&copy; OpenStreetMap &copy; CARTO',
+        attribution:
+          'Tiles &copy; Esri — Source: Esri, Maxar, Earthstar Geographics',
       }
     ).addTo(mapa)
 
@@ -235,18 +247,32 @@ export default function MapaDesloca({
         icon: iconeOnibus(linha.cor),
       })
 
-      marker.bindPopup(`
+      // Popup calculado NO MOMENTO EM QUE É ABERTO (função, não texto fixo):
+      // assim ele sempre mostra o estado atual do relógio simulado —
+      // se o ônibus está em rota ou parado, e quando sai a próxima viagem
+      marker.bindPopup(() => {
+        const desde = desdeUltimaPartida(linha.partida.primeira, linha.partida.intervalo)
+        const emRota = desde !== null && desde < linha.duracaoVoltaMin
+        const proxima = proximaPartida(linha.partida.primeira, linha.partida.intervalo)
+
+        return `
         <div style="font-family: 'Manrope', sans-serif; font-size: 13px; line-height: 1.45;">
           <strong style="display: block; font-size: 14px; margin-bottom: 3px;">🚌 Linha ${linha.codigo} — ${linha.nome}</strong>
-          <div style="color: #4F7A5A; font-weight: 700; margin-bottom: 4px;">● Em operação</div>
+          <div style="color: ${emRota ? '#4F7A5A' : '#B08A57'}; font-weight: 700; margin-bottom: 4px;">● ${emRota ? 'Em rota' : 'No Terminal (vaga)'}</div>
           <div>Placa: <b>${linha.proximoOnibus.placa}</b></div>
-          <div>Previsão: <b>${linha.proximoOnibus.previsao}</b></div>
+          ${
+            emRota
+              ? `<div>Previsão: <b>${linha.proximoOnibus.previsao}</b></div>`
+              : `<div>Próxima partida: <b>${formatarRelogio(proxima)}</b></div>`
+          }
           <div>Lotação: <b>${linha.proximoOnibus.lotacao}</b></div>
+          <div style="margin-top: 4px; color: #6B6863;">Partidas: <b>${formatarRelogio(linha.partida.primeira)}</b> e depois a cada <b>${linha.partida.intervalo} min</b></div>
           <button style="margin-top: 8px; width: 100%; padding: 6px 10px; background: #1D1D1B; color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;" onclick="window.__selecionarLinhaDesloca && window.__selecionarLinhaDesloca(${linha.id})">
             Ver trajeto completo
           </button>
         </div>
-      `)
+      `
+      })
 
       if (onLinhaClick) {
         marker.on('click', () => onLinhaClick(linha))
@@ -263,9 +289,10 @@ export default function MapaDesloca({
   }, [todasLinhas, onLinhaClick])
 
   // ---------------------------------------------------------------------------
-  // ANIMAÇÃO DOS ÔNIBUS: saem do Terminal e dão a volta completa na rota em
-  // loop (simulação da apresentação). Cada linha parte escalonada, para os
-  // ônibus não saírem todos juntos do mesmo ponto.
+  // ANIMAÇÃO DOS ÔNIBUS POR HORÁRIO (relógio simulado acelerado)
+  // Cada linha tem horário fixo de partida (ex.: 101 sai às 14:20) e intervalo
+  // próprio. O ônibus só anda quando está na janela entre a partida e o fim
+  // da volta; fora disso fica parado na vaga do Terminal até a próxima saída.
   // ---------------------------------------------------------------------------
   useEffect(() => {
     // Quem prefere menos movimento fica com os ônibus parados no terminal
@@ -276,7 +303,7 @@ export default function MapaDesloca({
     // trajeto — assim dá para interpolar a posição exata entre dois pontos
     const rotas = todasLinhas
       .filter((linha) => linha.status === 'operacao' && linha.trajeto.length > 1)
-      .map((linha, indice) => {
+      .map((linha) => {
         const acumulado: number[] = [0]
         let total = 0
         for (let i = 1; i < linha.trajeto.length; i++) {
@@ -289,34 +316,31 @@ export default function MapaDesloca({
           acumulado,
           total,
           duracaoSeg,
-          // Saída escalonada: cada ônibus parte 25s depois do anterior, para
-          // todos estarem andando já no começo da apresentação
-          atrasoSeg: indice * 25,
+          // Onde o ônibus espera, parado, quando não está em rota
+          vaga: VAGAS[linha.id] ?? linha.trajeto[0],
         }
       })
       .filter((rota) => rota.total > 0)
 
     if (!rotas.length) return
 
-    const inicio = performance.now()
-
-    const animar = (tempo: number) => {
-      const decorrido = (tempo - inicio) / 1000
-
+    const animar = () => {
       rotas.forEach((rota) => {
         const marcador = marcadoresOnibusRef.current[rota.linha.id]
         if (!marcador) return
 
-        const desdePartida = decorrido - rota.atrasoSeg
+        // Minutos desde a última partida da linha no relógio simulado
+        const desde = desdeUltimaPartida(rota.linha.partida.primeira, rota.linha.partida.intervalo)
 
-        // Ainda não partiu: ônibus espera no Terminal
-        if (desdePartida <= 0) {
-          marcador.setLatLng(rota.linha.trajeto[0])
+        // Antes da primeira viagem do dia, ou já completou a volta:
+        // o ônibus aguarda na vaga do Terminal até a próxima partida
+        if (desde === null || desde >= rota.linha.duracaoVoltaMin) {
+          marcador.setLatLng(rota.vaga)
           return
         }
 
-        // Fração da volta atual (0 = saiu do terminal, 1 = voltou)
-        const fracao = (desdePartida % rota.duracaoSeg) / rota.duracaoSeg
+        // Fração da volta atual (0 = acabou de sair, 1 = voltou ao Terminal)
+        const fracao = desde / rota.linha.duracaoVoltaMin
         const alvo = fracao * rota.total
 
         // Busca binária do trecho onde o ônibus está agora
@@ -365,12 +389,12 @@ export default function MapaDesloca({
     linhasParaDesenhar.forEach((linha) => {
       const ativa = linhaAtiva?.id === linha.id
 
-      // Estilo enxuto para não poluir: ativa grossa e forte, as demais bem
-      // finas e translúcidas (sem tracejado, que só bagunçava o visual)
+      // Estilo enxuto para não poluir: ativa um pouco mais marcada e as
+      // demais bem finas e translúcidas (linhas finas, tipo Google Maps)
       const polyline = L.polyline(linha.trajeto, {
         color: linha.cor,
-        weight: ativa ? 5 : 2.5,
-        opacity: ativa ? 1 : linhaAtiva ? 0.28 : 0.6,
+        weight: ativa ? 4 : 2,
+        opacity: ativa ? 0.9 : linhaAtiva ? 0.22 : 0.5,
       }).addTo(camadaTrajetos)
 
       if (onLinhaClick) {

@@ -1968,6 +1968,32 @@ textarea.campo {
   pointer-events: auto;
 }
 
+/* -----------------------------------------------------------------------------
+   RELÓGIO DA SIMULAÇÃO (chip escuro com o horário fictício da demonstração)
+   ----------------------------------------------------------------------------- */
+.relogio-simulado {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 46px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: rgba(29, 29, 27, 0.94);
+  border: 1px solid rgba(201, 168, 130, 0.55);
+  backdrop-filter: blur(8px);
+  color: #c9a882;
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+  user-select: none;
+}
+
+.relogio-simulado b {
+  color: #faf8f4;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
 /* Botões flutuantes (FABs) */
 .botao-flutuante {
   display: inline-flex;

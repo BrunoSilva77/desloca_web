@@ -20,6 +20,7 @@ import DicaNotificacao from '../componentes/DicaNotificacao'
 import Toast from '../componentes/Toast'
 import { LINHAS, ALERTAS, type Linha, type Alerta } from '../dados/linhas'
 import { distanciaKm, tempoCaminhadaMin, formatarDistancia } from '../utilidades/geo'
+import { formatarRelogio } from '../utilidades/relogioSimulado'
 
 // Ícone SVG de ônibus reutilizável
 function IconeOnibus({ cor }: { cor: string }) {
@@ -88,6 +89,15 @@ export default function Mapa() {
   // Sistema de dicas e toasts
   const [dicaContextual, setDicaContextual] = useState<string | null>(null)
   const [toastMensagem, setToastMensagem] = useState<string | null>(null)
+
+  // Relógio da simulação (corre 10x mais rápido que o real). Atualiza a cada
+  // segundo real para o horário do chip acompanhar as partidas dos ônibus
+  const [horaSimulada, setHoraSimulada] = useState(() => formatarRelogio())
+
+  useEffect(() => {
+    const intervalo = setInterval(() => setHoraSimulada(formatarRelogio()), 1000)
+    return () => clearInterval(intervalo)
+  }, [])
 
   // ---------------------------------------------------------------------------
   // Disparador de dica contextual
@@ -343,6 +353,12 @@ export default function Mapa() {
           BARRA DE AÇÕES FLUTUANTES (Top bar sobre o mapa)
       ------------------------------------------------------------------------- */}
       <div className="acoes-flutuantes-mapa" role="toolbar" aria-label="Ações do mapa">
+        {/* Relógio da simulação (corre 10x mais rápido que o real): mostra o
+            horário das partidas dos ônibus no mapa */}
+        <span className="relogio-simulado" aria-label="Horário da simulação">
+          🕐 <b>{horaSimulada}</b>
+        </span>
+
         {/* Sino de Notificações com badge de novidades */}
         <button
           type="button"

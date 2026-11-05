@@ -80,6 +80,14 @@ git push
       poluição visual), marcador fixo do Terminal, pontos de parada só da linha
       ativa e enquadramento automático da rede de rotas
       (`testes/verificar_rotas_apresentacao.py`)
+- [x] **04/11** — **Mapa tipo Google + horários de partida**: tiles Esri World
+      Street Map (mais contraste e sem poluição, sem chave), linhas mais finas
+      (4px ativa / 2px demais), **relógio simulado acelerado** (14:18, 10× mais
+      rápido) no topo do mapa e partidas fixas por linha — 101 às 14:20, 202 às
+      14:25, 303 às 14:30, 404 às 14:35, repetindo a cada 20 min simulados; o
+      ônibus espera na vaga do Terminal fora da janela da viagem e o popup mostra
+      a próxima partida ao vivo (Playwright: partidas em 12/42/72/102s reais,
+      4/4 parando na vaga, relógio 14:18→14:44, 0 erros de console)
 
 ---
 

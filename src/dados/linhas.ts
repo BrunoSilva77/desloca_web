@@ -28,6 +28,10 @@ export type Linha = {
   trajeto: [number, number][] // Lista de coordenadas [latitude, longitude] do caminho
   pontos: { nome: string; coords: [number, number] }[] // Paradas da linha
   duracaoVoltaMin: number // Duração da volta completa na simulação (minutos)
+  // Horário da linha no relógio simulado (minutos desde 00:00).
+  // "primeira" = primeira saída do dia (ex.: 101 = 14:20);
+  // "intervalo" = de quanto em quanto tempo volta a sair do Terminal.
+  partida: { primeira: number; intervalo: number }
   proximoOnibus: {
     placa: string
     posicao: [number, number] // Onde o ônibus está agora
@@ -54,6 +58,8 @@ const CADASTRO = [
     cor: '#1D1D1B',
     tarifa: 'R$ 5,00',
     frequencia: 'a cada 10 minutos',
+    // Sai às 14:20 e repete a cada 20 minutos simulados
+    partida: { primeira: 14 * 60 + 20, intervalo: 20 },
     status: 'operacao' as const,
     proximoOnibus: {
       placa: 'ABC-1D23',
@@ -68,6 +74,8 @@ const CADASTRO = [
     cor: '#C9A882',
     tarifa: 'R$ 5,00',
     frequencia: 'a cada 12 minutos',
+    // Sai às 14:25 e repete a cada 20 minutos simulados
+    partida: { primeira: 14 * 60 + 25, intervalo: 20 },
     status: 'operacao' as const,
     proximoOnibus: {
       placa: 'EFG-4H56',
@@ -82,6 +90,8 @@ const CADASTRO = [
     cor: '#4F7A5A',
     tarifa: 'R$ 5,00',
     frequencia: 'a cada 15 minutos',
+    // Sai às 14:30 e repete a cada 20 minutos simulados
+    partida: { primeira: 14 * 60 + 30, intervalo: 20 },
     status: 'operacao' as const,
     proximoOnibus: {
       placa: 'IJK-7L89',
@@ -96,6 +106,8 @@ const CADASTRO = [
     cor: '#8C6A4F',
     tarifa: 'R$ 6,50',
     frequencia: 'a cada 15 minutos',
+    // Sai às 14:35 e repete a cada 20 minutos simulados
+    partida: { primeira: 14 * 60 + 35, intervalo: 20 },
     status: 'operacao' as const,
     proximoOnibus: {
       placa: 'MNO-0P12',
@@ -141,6 +153,8 @@ export const LINHAS: Linha[] = CADASTRO.map((linha) => {
     })),
     // Duração da volta completa na simulação (usada pela animação do mapa)
     duracaoVoltaMin: rota?.duracao_volta_min ?? 6,
+    // Horários fixos de partida no relógio simulado
+    partida: linha.partida,
     proximoOnibus: {
       placa: linha.proximoOnibus.placa,
       // Ônibus começa NO TERMINAL: a simulação o faz sair e dar a volta
