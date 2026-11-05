@@ -1,0 +1,200 @@
+[
+ {
+  "nome": "Amizade",
+  "tipo": "suburb",
+  "lat": -21.1893018,
+  "lon": -50.4545329
+ },
+ {
+  "nome": "Boa Vista",
+  "tipo": "quarter",
+  "lat": -21.1955379,
+  "lon": -50.4581962
+ },
+ {
+  "nome": "Chácaras Califórnia",
+  "tipo": "quarter",
+  "lat": -21.216732,
+  "lon": -50.4815419
+ },
+ {
+  "nome": "Condomínio Copacabana Residential Park",
+  "tipo": "suburb",
+  "lat": -21.0494015,
+  "lon": -50.4396527
+ },
+ {
+  "nome": "Condomínio Costa Azul",
+  "tipo": "neighbourhood",
+  "lat": -21.0675575,
+  "lon": -50.3742505
+ },
+ {
+  "nome": "Condomínio Santa Fé",
+  "tipo": "neighbourhood",
+  "lat": -21.0605029,
+  "lon": -50.3685486
+ },
+ {
+  "nome": "Conjunto Habitacional Manoel Pires",
+  "tipo": "quarter",
+  "lat": -21.1753784,
+  "lon": -50.4552068
+ },
+ {
+  "nome": "Conjunto Habitacional Mão Divina",
+  "tipo": "quarter",
+  "lat": -21.1939405,
+  "lon": -50.4802952
+ },
+ {
+  "nome": "Dona Amélia",
+  "tipo": "quarter",
+  "lat": -21.1897831,
+  "lon": -50.4434352
+ },
+ {
+  "nome": "Engenheiro Taveira",
+  "tipo": "suburb",
+  "lat": -21.1507421,
+  "lon": -50.5025071
+ },
+ {
+  "nome": "Higenópolis",
+  "tipo": "suburb",
+  "lat": -21.2139139,
+  "lon": -50.448644
+ },
+ {
+  "nome": "Ipanema",
+  "tipo": "quarter",
+  "lat": -21.1827411,
+  "lon": -50.4446573
+ },
+ {
+  "nome": "Jardim Brasil",
+  "tipo": "suburb",
+  "lat": -21.1986335,
+  "lon": -50.4548515
+ },
+ {
+  "nome": "Jardim Ipanema",
+  "tipo": "suburb",
+  "lat": -21.1779351,
+  "lon": -50.4480627
+ },
+ {
+  "nome": "Jardim Presidente",
+  "tipo": "quarter",
+  "lat": -21.1961563,
+  "lon": -50.462858
+ },
+ {
+  "nome": "Lago Azul",
+  "tipo": "quarter",
+  "lat": -21.2360547,
+  "lon": -50.4598228
+ },
+ {
+  "nome": "Morumbi",
+  "tipo": "quarter",
+  "lat": -21.217933,
+  "lon": -50.4471491
+ },
+ {
+  "nome": "Paraiso",
+  "tipo": "suburb",
+  "lat": -21.187085,
+  "lon": -50.4594938
+ },
+ {
+  "nome": "Parque Industrial",
+  "tipo": "suburb",
+  "lat": -21.1910027,
+  "lon": -50.4635243
+ },
+ {
+  "nome": "Porto Real II",
+  "tipo": "quarter",
+  "lat": -21.191059,
+  "lon": -50.4748018
+ },
+ {
+  "nome": "Residencial Aimoré",
+  "tipo": "quarter",
+  "lat": -21.1576987,
+  "lon": -50.4895675
+ },
+ {
+  "nome": "Residencial Beatriz",
+  "tipo": "quarter",
+  "lat": -21.2012374,
+  "lon": -50.4808852
+ },
+ {
+  "nome": "Residencial e Comercial Carazza",
+  "tipo": "quarter",
+  "lat": -21.1898626,
+  "lon": -50.4675487
+ },
+ {
+  "nome": "Residencial Águas Claras",
+  "tipo": "neighbourhood",
+  "lat": -21.1699658,
+  "lon": -50.4709673
+ },
+ {
+  "nome": "Rosele",
+  "tipo": "suburb",
+  "lat": -21.1854043,
+  "lon": -50.4639896
+ },
+ {
+  "nome": "Saudade",
+  "tipo": "suburb",
+  "lat": -21.2248896,
+  "lon": -50.443607
+ },
+ {
+  "nome": "São José",
+  "tipo": "suburb",
+  "lat": -21.1951075,
+  "lon": -50.4792008
+ },
+ {
+  "nome": "São Rafael",
+  "tipo": "quarter",
+  "lat": -21.1698568,
+  "lon": -50.4561647
+ },
+ {
+  "nome": "São Vicente",
+  "tipo": "suburb",
+  "lat": -21.2052095,
+  "lon": -50.4460937
+ },
+ {
+  "nome": "Verde Parque",
+  "tipo": "neighbourhood",
+  "lat": -21.1688741,
+  "lon": -50.4689268
+ },
+ {
+  "nome": "Vila Mendonça",
+  "tipo": "suburb",
+  "lat": -21.2070534,
+  "lon": -50.4351375
+ },
+ {
+  "nome": "Vila Nova",
+  "tipo": "quarter",
+  "lat": -21.2106256,
+  "lon": -50.4584211
+ },
+ {
+  "nome": "Água Branca 1",
+  "tipo": "suburb",
+  "lat": -21.2086069,
+  "lon": -50.3979255
+ }
+]

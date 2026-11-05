@@ -18,8 +18,6 @@ export default function IndiceMovida() {
     }
   }, [])
 
-  const linhasAtivas = LINHAS.filter((linha) => linha.status === 'operacao')
-
   return (
     <main className="pagina indice-pagina">
     <section className="indice-cabecalho">

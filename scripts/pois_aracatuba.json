@@ -1,0 +1,121 @@
+[
+ {
+  "consulta": "Terminal Urbano Nelson Reis Alves, Araçatuba",
+  "nome": "Terminal Urbano Nelson Reis Alves",
+  "lat": -21.203169,
+  "lon": -50.4385078,
+  "dentro_da_cidade": true
+ },
+ {
+  "consulta": "Shopping Araçatuba, Araçatuba",
+  "nome": "Shopping Praça Nova Araçatuba",
+  "lat": -21.211808,
+  "lon": -50.4698304,
+  "dentro_da_cidade": true
+ },
+ {
+  "consulta": "Havan Araçatuba, Araçatuba",
+  "nome": "Havan",
+  "lat": -21.202375,
+  "lon": -50.4388966,
+  "dentro_da_cidade": true
+ },
+ {
+  "consulta": "Museu Araçatubense de Artes Plásticas, Araçatuba",
+  "nome": "Museu Araçatubense de Artes Plásticas",
+  "lat": -21.2060816,
+  "lon": -50.4416659,
+  "dentro_da_cidade": true
+ },
+ {
+  "consulta": "Parque Ecológico Baguaçu, Araçatuba",
+  "nome": "Parque Ecológico Baguaçú",
+  "lat": -21.221445,
+  "lon": -50.4286407,
+  "dentro_da_cidade": true
+ },
+ {
+  "consulta": "Zoológico Municipal Dr. Flávio Leite Ribeiro, Araçatuba",
+  "nome": "Zoológico Municipal Doutor Flávio Leite Ribeiro",
+  "lat": -21.1927439,
+  "lon": -50.4434665,
+  "dentro_da_cidade": true
+ },
+ {
+  "consulta": "Estádio Municipal Adhemar de Barros, Araçatuba",
+  "nome": "Estádio Municipal Adhemar de Barros",
+  "lat": -21.2177087,
+  "lon": -50.444384,
+  "dentro_da_cidade": true
+ },
+ {
+  "consulta": "Praça Rui Barbosa, Araçatuba",
+  "nome": "Praça Rui Barbosa",
+  "lat": -21.206225,
+  "lon": -50.4388758,
+  "dentro_da_cidade": true
+ },
+ {
+  "consulta": "Centro Cultural Ferroviário, Araçatuba",
+  "nome": "Centro Cultural Ferroviário",
+  "lat": -21.2012436,
+  "lon": -50.4381535,
+  "dentro_da_cidade": true
+ },
+ {
+  "consulta": "Catedral Nossa Senhora Aparecida, Araçatuba",
+  "nome": "Catedral Nossa Senhora Aparecida",
+  "lat": -21.207057,
+  "lon": -50.4384783,
+  "dentro_da_cidade": true
+ },
+ {
+  "consulta": "Avenida Brasília, Araçatuba",
+  "nome": "Avenida Brasília",
+  "lat": -21.2372456,
+  "lon": -50.4391301,
+  "dentro_da_cidade": true
+ },
+ {
+  "consulta": "Aeroporto de Araçatuba",
+  "nome": "Aeroporto de Araçatuba",
+  "lat": -21.140815,
+  "lon": -50.4251391,
+  "dentro_da_cidade": true
+ },
+ {
+  "consulta": "Teatro Castro Alves Araçatuba",
+  "nome": "Teatro Castro Alves",
+  "lat": -21.206008,
+  "lon": -50.4417118,
+  "dentro_da_cidade": true
+ },
+ {
+  "consulta": "Faculdade de Odontologia de Araçatuba",
+  "nome": "Unesp - Faculdade de Odontologia de Araçatuba",
+  "lat": -21.2511175,
+  "lon": -50.4205161,
+  "dentro_da_cidade": true
+ },
+ {
+  "consulta": "Hospital Araçatuba",
+  "nome": "Hospital Unimed Araçatuba",
+  "lat": -21.2299234,
+  "lon": -50.4157484,
+  "dentro_da_cidade": true
+ },
+ {
+  "consulta": "Praça do Relógio Araçatuba",
+  "nome": "Praça do Relógio",
+  "lat": -21.203668,
+  "lon": -50.4388623,
+  "dentro_da_cidade": true
+ },
+ {
+  "consulta": "Avenida dos Araçás Araçatuba",
+  "nome": "Avenida dos Araçás",
+  "lat": -21.2024012,
+  "lon": -50.4307352,
+  "dentro_da_cidade": true
+ }
+]
