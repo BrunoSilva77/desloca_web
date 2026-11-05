@@ -69,6 +69,11 @@ const VAGAS: Record<number, [number, number]> = {
   4: [COORD_TERMINAL[0] - 0.0007, COORD_TERMINAL[1] - 0.0004],
 }
 
+// Lentidão da simulação: quanto mais tempo o ônibus leva para dar a volta.
+// 1.5 = a volta que era 8 minutos simulados passa a ser 12 (ônibus mais
+// calmo na tela, sem mudar os horários de partida)
+const FATOR_LENTIDAO = 1.5
+
 function iconeTerminal() {
   return L.divIcon({
     className: 'marcador-terminal',
@@ -252,7 +257,9 @@ export default function MapaDesloca({
       // se o ônibus está em rota ou parado, e quando sai a próxima viagem
       marker.bindPopup(() => {
         const desde = desdeUltimaPartida(linha.partida.primeira, linha.partida.intervalo)
-        const emRota = desde !== null && desde < linha.duracaoVoltaMin
+        // Mesma duração de volta usada na animação (com a lentidão aplicada)
+        const duracaoMin = linha.duracaoVoltaMin * FATOR_LENTIDAO
+        const emRota = desde !== null && desde < duracaoMin
         const proxima = proximaPartida(linha.partida.primeira, linha.partida.intervalo)
 
         return `
@@ -310,12 +317,14 @@ export default function MapaDesloca({
           total += metrosEntre(linha.trajeto[i - 1], linha.trajeto[i])
           acumulado.push(total)
         }
-        const duracaoSeg = linha.duracaoVoltaMin * 60
+        const duracaoSeg = linha.duracaoVoltaMin * 60 * FATOR_LENTIDAO
         return {
           linha,
           acumulado,
           total,
           duracaoSeg,
+          // Duração da volta já com a lentidão aplicada (minutos simulados)
+          duracaoMin: linha.duracaoVoltaMin * FATOR_LENTIDAO,
           // Onde o ônibus espera, parado, quando não está em rota
           vaga: VAGAS[linha.id] ?? linha.trajeto[0],
         }
@@ -334,13 +343,13 @@ export default function MapaDesloca({
 
         // Antes da primeira viagem do dia, ou já completou a volta:
         // o ônibus aguarda na vaga do Terminal até a próxima partida
-        if (desde === null || desde >= rota.linha.duracaoVoltaMin) {
+        if (desde === null || desde >= rota.duracaoMin) {
           marcador.setLatLng(rota.vaga)
           return
         }
 
         // Fração da volta atual (0 = acabou de sair, 1 = voltou ao Terminal)
-        const fracao = desde / rota.linha.duracaoVoltaMin
+        const fracao = desde / rota.duracaoMin
         const alvo = fracao * rota.total
 
         // Busca binária do trecho onde o ônibus está agora
@@ -390,11 +399,14 @@ export default function MapaDesloca({
       const ativa = linhaAtiva?.id === linha.id
 
       // Estilo enxuto para não poluir: ativa um pouco mais marcada e as
-      // demais bem finas e translúcidas (linhas finas, tipo Google Maps)
+      // demais bem finas e translúcidas. SEMPRE pontilhada (com ou sem linha
+      // selecionada), traço redondinho tipo "percurso sugerido" do Google Maps
       const polyline = L.polyline(linha.trajeto, {
         color: linha.cor,
         weight: ativa ? 4 : 2,
         opacity: ativa ? 0.9 : linhaAtiva ? 0.22 : 0.5,
+        dashArray: '1 10', // pontilhado fino: bolinhas a cada 11px
+        lineCap: 'round', // bolinhas redondas em vez de quadradinhos
       }).addTo(camadaTrajetos)
 
       if (onLinhaClick) {

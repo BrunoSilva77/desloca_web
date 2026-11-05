@@ -88,6 +88,11 @@ git push
       ônibus espera na vaga do Terminal fora da janela da viagem e o popup mostra
       a próxima partida ao vivo (Playwright: partidas em 12/42/72/102s reais,
       4/4 parando na vaga, relógio 14:18→14:44, 0 erros de console)
+- [x] **05/11** — **Rotas pontilhadas + ônibus mais lentos**: todas as rotas
+      viraram tracejado redondo (com ou sem linha selecionada) e a volta dos
+      ônibus ficou 50% mais lenta (`FATOR_LENTIDAO = 1.5`, sem alterar os
+      horários de partida); Playwright: 4/4 pontilhadas, 4/4 parando na vaga,
+      0 erros de console
 
 ---
 

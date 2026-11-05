@@ -9,7 +9,8 @@ pois a leitura de imagem do ambiente está imprevisível):
    acelerado: 101 sai às 14:20, 202 às 14:25, 303 às 14:30, 404 às 14:35)
    — cada ônibus anda, para na vaga do Terminal e volta a sair;
 4. chip do relógio simulado no topo do mapa e avançando;
-5. as 4 rotas desenhadas por padrão, sem pontos de parada (só linha ativa);
+5. as 4 rotas desenhadas por padrão, SEMPRE pontilhadas (com ou sem linha
+   ativa) e sem pontos de parada (só linha ativa);
 6. pontos de parada aparecem ao selecionar uma linha;
 7. zero erros de console na página do mapa e na home.
 
@@ -69,6 +70,11 @@ with sync_playwright() as p:
     )
     n_pontos_padrao = pagina.evaluate(
         "() => document.querySelectorAll('.marcador-ponto').length"
+    )
+    # Todas as rotas devem ser pontilhadas (com ou sem linha selecionada)
+    dash_rotas = pagina.evaluate(
+        """() => [...document.querySelectorAll('.leaflet-overlay-pane path')]
+              .map((p) => p.getAttribute('stroke-dasharray'))"""
     )
 
     # ------------------------------------------------ AMOSTRAGEM DA SIMULAÇÃO
@@ -132,6 +138,10 @@ with sync_playwright() as p:
     n_pontos_ativa = pagina.evaluate(
         "() => document.querySelectorAll('.marcador-ponto').length"
     )
+    dash_ativa = pagina.evaluate(
+        """() => [...document.querySelectorAll('.leaflet-overlay-pane path')]
+              .map((p) => p.getAttribute('stroke-dasharray'))"""
+    )
 
     tiles_esri = all("arcgisonline.com" in src for src in tiles) and bool(tiles)
     tiles_http_ok = bool(status_tiles) and all(s == 200 for s in status_tiles)
@@ -141,6 +151,7 @@ with sync_playwright() as p:
     print(f"onibus no mapa: {n_onibus} (esperado 4)")
     print(f"terminal visivel: {tem_terminal}")
     print(f"rotas desenhadas (paths SVG): {n_rotas} (esperado >= 4)")
+    print(f"rotas pontilhadas: {sum(1 for d in dash_rotas if d)}/{len(dash_rotas)}")
     print(f"pontos de parada no padrao: {n_pontos_padrao} (esperado 0)")
     print(f"onibus que ficaram parados na vaga: {total_paradas}/4")
     print(f"atraso entre a 1a e a ultima partida: {atraso_entre_partidas:.0f}s "
@@ -155,12 +166,16 @@ with sync_playwright() as p:
     assert tem_terminal, "marcador do Terminal ausente"
     assert n_rotas >= 4, f"esperava >= 4 rotas, achei {n_rotas}"
     assert n_pontos_padrao == 0, "pontos de parada aparecem sem linha ativa"
+    assert dash_rotas and all(d for d in dash_rotas), "alguma rota nao esta pontilhada"
     assert total_paradas == 4, "nem todos os onibus aguardaram na vaga do Terminal"
     assert atraso_entre_partidas >= 60, (
         f"partidas muito juntas ({atraso_entre_partidas:.0f}s entre a 1a e a ultima)"
     )
     assert relogio_ok, f"chip do relogio nao avanca: {relogio1!r} -> {relogio2!r}"
     assert n_pontos_ativa > 0, "pontos nao apareceram com linha selecionada"
+    assert dash_ativa and all(d for d in dash_ativa), (
+        "linha selecionada deixou de ser pontilhada"
+    )
     assert not erros, f"erros de console: {erros}"
     pagina.close()
 
