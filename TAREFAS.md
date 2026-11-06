@@ -98,6 +98,14 @@ git push
       (`scripts/recortar_logo.py` → `src/assets/logo-marca.png`), usado no
       cabeçalho e no menu mobile (texto "Desloca" removido, pois a logo já
       traz o nome); verificado com Playwright (logo carregada 98×30, 0 erros)
+- [x] **06/11** — **Vagas no terminal + pin alinhado na rua**: ônibus agora
+      esperam enfileirados NA rua de saída do Terminal (15/35/55/75 m, as 4
+      rotas compartilham os 172 m iniciais) e a partida segue o trajeto direto
+      (sem pular quarteirão); alfinetes girados −45° com a âncora na ponta —
+      ponta encosta na coordenada da rua — e emoji em pé que gira no rumo da
+      via. Playwright: vagas 33–81 m do terminal em pontos distintos do
+      trajeto, emojis girando com a rua, 0 erros (`verificar_vagas_onibus.py`,
+      `conferir_vagas_latlng.py`)
 
 ---
 

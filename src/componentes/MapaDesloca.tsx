@@ -55,18 +55,38 @@ function metrosEntre(a: [number, number], b: [number, number]) {
   return 2 * RAIO * Math.asin(Math.sqrt(h))
 }
 
+// Distâncias (em metros) de cada ônibus até o Terminal quando está esperando
+// na vaga. As 4 linhas começam pelo MESMO trecho de rua, então as vagas viram
+// uma "fila" na rua de saída do Terminal (15, 35, 55 e 75 m): os ônibus ficam
+// em volta do terminal, alinhados na via, e na partida seguem pelo trajeto
+// normal — sem pular quarteirão nem parar em ponto aleatório.
+const DISTANCIAS_VAGA_M: Record<number, number> = {
+  1: 15,
+  2: 35,
+  3: 55,
+  4: 75,
+}
+
 // Coordenada do Terminal Urbano Nelson Reis Alves: origem e destino de
 // todas as rotas simuladas da apresentação
 const COORD_TERMINAL: [number, number] = [-21.203169, -50.4385078]
 
-// "Vagas" do Terminal: pequenos deslocamentos em volta do ponto de partida,
-// um por linha. Quando o ônibus não está em rota, ele fica parado na SUA vaga
-// (assim os 4 veículos não se empilham em cima do mesmo marcador).
-const VAGAS: Record<number, [number, number]> = {
-  1: [COORD_TERMINAL[0] + 0.0007, COORD_TERMINAL[1] + 0.0004],
-  2: [COORD_TERMINAL[0] + 0.0007, COORD_TERMINAL[1] - 0.0004],
-  3: [COORD_TERMINAL[0] - 0.0007, COORD_TERMINAL[1] + 0.0004],
-  4: [COORD_TERMINAL[0] - 0.0007, COORD_TERMINAL[1] - 0.0004],
+// Ponto "metros" metros à frente do início do trajeto, caminhando pela rota
+// (a vaga precisa estar NA RUA do trajeto, por isso percorre os vértices)
+function pontoNoTrajeto(trajeto: [number, number][], metros: number): [number, number] {
+  let acumulado = 0
+  for (let i = 1; i < trajeto.length; i++) {
+    const trecho = metrosEntre(trajeto[i - 1], trajeto[i])
+    if (acumulado + trecho >= metros) {
+      const peso = trecho > 0 ? (metros - acumulado) / trecho : 0
+      return [
+        trajeto[i - 1][0] + (trajeto[i][0] - trajeto[i - 1][0]) * peso,
+        trajeto[i - 1][1] + (trajeto[i][1] - trajeto[i - 1][1]) * peso,
+      ]
+    }
+    acumulado += trecho
+  }
+  return trajeto[trajeto.length - 1]
 }
 
 // Lentidão da simulação: quanto mais tempo o ônibus leva para dar a volta.
@@ -75,6 +95,8 @@ const VAGAS: Record<number, [number, number]> = {
 const FATOR_LENTIDAO = 1.5
 
 function iconeTerminal() {
+  // Alfinete com a PONTA (canto vivo) apontando para baixo, exatamente na
+  // coordenada do Terminal — o emoji fica em pé graças ao contra-rotate
   return L.divIcon({
     className: 'marcador-terminal',
     html: `<div style="
@@ -82,23 +104,30 @@ function iconeTerminal() {
       width:38px;height:38px;border-radius:50% 50% 50% 6px;
       display:flex;align-items:center;justify-content:center;
       border:3px solid #C9A882;box-shadow:0 4px 14px rgba(0,0,0,.45);
-      transform:rotate(45deg);font-size:17px">🚉</div>`,
+      transform:rotate(-45deg)">
+      <span style="transform:rotate(45deg);font-size:17px">🚉</span></div>`,
     iconSize: [38, 38],
-    iconAnchor: [19, 38],
+    // Ponta do alfinete = canto inferior esquerdo após rodar -45° = (19, 46)
+    iconAnchor: [19, 46],
   })
 }
 
 function iconeOnibus(cor: string) {
+  // Mesmo esquema do Terminal: alfinete girado -45° com a ponta em (17, 41,
+  // fora da caixa de 34px) servindo de âncora — assim a ponta encosta na rua
+  // em vez do centro do marcador. O emoji é girado de volta (+45°) para ficar
+  // em pé, e a animação ajusta o giro para o ônibus "apontar" para a rua.
   return L.divIcon({
     className: 'marcador-onibus-animado',
     html: `<div style="
       background:${cor};
-      width:34px;height:34px;border-radius:50% 50% 50% 4px;
+      width:34px;height:34px;border-radius:50% 50% 50% 6px;
       display:flex;align-items:center;justify-content:center;
       border:2px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.35);
-      transform:rotate(45deg);font-size:15px;cursor:pointer">🚌</div>`,
+      transform:rotate(-45deg)">
+      <span class="onibus-emoji" style="transform:rotate(45deg);font-size:15px;cursor:pointer">🚌</span></div>`,
     iconSize: [34, 34],
-    iconAnchor: [17, 34],
+    iconAnchor: [17, 41],
   })
 }
 
@@ -113,6 +142,23 @@ function iconePonto(destaque = false) {
     iconSize: [tam, tam],
     iconAnchor: [tam / 2, tam / 2],
   })
+}
+
+// Rumo (bearing) de um trecho, em graus: 0 = norte, sentido horário.
+// Usado para girar o emoji do ônibus e ele "apontar" para onde a rua vai
+function rumoGraus(a: [number, number], b: [number, number]): number {
+  const dLon = (b[1] - a[1]) * Math.cos((a[0] * Math.PI) / 180)
+  const dLat = b[0] - a[0]
+  return (Math.atan2(dLon, dLat) * 180) / Math.PI
+}
+
+// Gira o emoji dentro do alfinete (graus já em vista de tela: 45 desfaz a
+// inclinação do alfinete e o restante segue o rumo da rua)
+function girarEmoji(marcador: L.Marker, grausVisiveis: number) {
+  const emoji = marcador
+    .getElement()
+    ?.querySelector('.onibus-emoji') as HTMLElement | null
+  if (emoji) emoji.style.transform = `rotate(${grausVisiveis}deg)`
 }
 
 function iconeUsuario() {
@@ -201,6 +247,12 @@ export default function MapaDesloca({
     camadaAlertasRef.current = L.layerGroup().addTo(mapa)
     camadaOnibusRef.current = L.layerGroup().addTo(mapa)
     mapaRef.current = mapa
+
+    // Atalho só em desenvolvimento: os testes (Playwright) usam para mover a
+    // câmera do Leaflet, tipo enquadrar o Terminal de perto
+    if (import.meta.env.DEV) {
+      ;(window as unknown as { __mapaDesloca?: L.Map }).__mapaDesloca = mapa
+    }
 
     // Terminal Urbano Nelson Reis Alves: marcador sempre visível, pois é o
     // ponto de partida e chegada de todas as linhas (simulação da apresentação)
@@ -325,8 +377,10 @@ export default function MapaDesloca({
           duracaoSeg,
           // Duração da volta já com a lentidão aplicada (minutos simulados)
           duracaoMin: linha.duracaoVoltaMin * FATOR_LENTIDAO,
-          // Onde o ônibus espera, parado, quando não está em rota
-          vaga: VAGAS[linha.id] ?? linha.trajeto[0],
+          // Vaga (fila de espera) na rua de saída, em metros do início
+          vagaMetros: DISTANCIAS_VAGA_M[linha.id] ?? 15,
+          // Onde o ônibus espera, parado: na rua do trajeto, em volta do Terminal
+          vaga: pontoNoTrajeto(linha.trajeto, DISTANCIAS_VAGA_M[linha.id] ?? 15),
         }
       })
       .filter((rota) => rota.total > 0)
@@ -345,12 +399,16 @@ export default function MapaDesloca({
         // o ônibus aguarda na vaga do Terminal até a próxima partida
         if (desde === null || desde >= rota.duracaoMin) {
           marcador.setLatLng(rota.vaga)
+          // Esperando: emoji em pé (o alfinete já compensa o -45° do pai)
+          girarEmoji(marcador, 45)
           return
         }
 
-        // Fração da volta atual (0 = acabou de sair, 1 = voltou ao Terminal)
+        // Fração da volta atual (0 = acabou de sair, 1 = voltou ao Terminal).
+        // Começa NA VAGA (não no início do trajeto) para a saída ser suave:
+        // o ônibus parte de onde estava esperando e segue pela rua
         const fracao = desde / rota.duracaoMin
-        const alvo = fracao * rota.total
+        const alvo = rota.vagaMetros + fracao * (rota.total - rota.vagaMetros)
 
         // Busca binária do trecho onde o ônibus está agora
         let esquerda = 0
@@ -369,6 +427,8 @@ export default function MapaDesloca({
         const a = rota.linha.trajeto[indice - 1]
         const b = rota.linha.trajeto[indice]
         marcador.setLatLng([a[0] + (b[0] - a[0]) * peso, a[1] + (b[1] - a[1]) * peso])
+        // Ônibus "apontando" para onde a rua vai (45° desfaz o giro do pai)
+        girarEmoji(marcador, 45 + rumoGraus(a, b))
       })
 
       quadro = requestAnimationFrame(animar)
