@@ -93,6 +93,11 @@ git push
       ônibus ficou 50% mais lenta (`FATOR_LENTIDAO = 1.5`, sem alterar os
       horários de partida); Playwright: 4/4 pontilhadas, 4/4 parando na vaga,
       0 erros de console
+- [x] **06/11** — **Nova logo no cabeçalho**: wordmark oficial de
+      `uploads/logoDesloca.jpeg` recortado e com fundo transparente
+      (`scripts/recortar_logo.py` → `src/assets/logo-marca.png`), usado no
+      cabeçalho e no menu mobile (texto "Desloca" removido, pois a logo já
+      traz o nome); verificado com Playwright (logo carregada 98×30, 0 erros)
 
 ---
 

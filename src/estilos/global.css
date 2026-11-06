@@ -89,12 +89,11 @@ input:focus-visible {
   color: var(--preto);
 }
 
-/* Imagem da logo do D (recortada em círculo) */
+/* Imagem da logo oficial (wordmark "Desloca", fundo transparente) */
 .marca-logo {
-  width: 34px;
-  height: 34px;
-  object-fit: cover; /* Corta a imagem sem distorcer */
-  border-radius: 8px;
+  height: 30px;
+  width: auto; /* Mantém a proporção do wordmark */
+  object-fit: contain;
 }
 
 /* Navegação do cabeçalho (desktop) */

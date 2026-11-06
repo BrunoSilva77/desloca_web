@@ -6,7 +6,7 @@
 
 import { useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import logoD from '../assets/logo-d.jpg'
+import logoMarca from '../assets/logo-marca.png'
 
 // Links do menu: Denúncias e Dicas saíram da navegação porque agora vivem
 // dentro do mapa (botão flutuante de denúncia e dicas contextuais).
@@ -34,10 +34,9 @@ export default function Cabecalho() {
 
   return (
     <header className="cabecalho">
-      {/* Marca do site: logo do "D" + nome Desloca */}
+      {/* Marca do site: logo oficial do Desloca (wordmark da pasta uploads) */}
       <NavLink to="/" className="marca" onClick={fecharMenu}>
-        <img className="marca-logo" src={logoD} alt="" aria-hidden="true" />
-        <span>Desloca</span>
+        <img className="marca-logo" src={logoMarca} alt="Desloca" />
       </NavLink>
 
       {/* Botão hamburguer no mobile */}
@@ -80,8 +79,7 @@ export default function Cabecalho() {
           >
             <div className="menu-mobile-topo">
               <div className="marca">
-                <img className="marca-logo" src={logoD} alt="" aria-hidden="true" />
-                <span>Desloca</span>
+                <img className="marca-logo" src={logoMarca} alt="Desloca" />
               </div>
               <button
                 type="button"
