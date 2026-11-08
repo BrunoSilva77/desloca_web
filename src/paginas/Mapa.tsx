@@ -503,20 +503,21 @@ export default function Mapa() {
           </span>
         </button>
 
-        {/* No mobile, este botão continua visível quando o bottom sheet está fechado. */}
-        {!painelAbertoMobile && (
-          <button
-            type="button"
-            className="botao-flutuante botao-abrir-linhas-mobile"
-            onClick={() => setPainelAbertoMobile(true)}
-            aria-label="Abrir lista de linhas"
-            title="Abrir lista de linhas"
-          >
-            <span aria-hidden="true">☰</span>
-            <span>Linhas</span>
-          </button>
-        )}
       </div>
+
+      {/* O botão fica fora da barra superior para ser ancorado no rodapé do mapa. */}
+      {!painelAbertoMobile && (
+        <button
+          type="button"
+          className="botao-flutuante botao-abrir-linhas-mobile"
+          onClick={() => setPainelAbertoMobile(true)}
+          aria-label="Abrir lista de linhas"
+          title="Abrir lista de linhas"
+        >
+          <span aria-hidden="true">☰</span>
+          <span>Linhas</span>
+        </button>
+      )}
 
       {/* -------------------------------------------------------------------------
           BOTÃO RESTAURAR PAINEL (Aparece no Desktop quando o painel for minimizado)

@@ -305,9 +305,11 @@ export default function MapaDesloca({
 
     const onResize = () => mapa.invalidateSize()
     window.addEventListener('resize', onResize)
+    window.visualViewport?.addEventListener('resize', onResize)
 
     return () => {
       window.removeEventListener('resize', onResize)
+      window.visualViewport?.removeEventListener('resize', onResize)
       mapa.remove()
       mapaRef.current = null
     }

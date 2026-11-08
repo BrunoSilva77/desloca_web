@@ -1959,10 +1959,17 @@ textarea.campo {
 .tela-mapa-unificada {
   position: relative;
   height: calc(100vh - 63px);
-  min-height: 480px;
+  height: calc(100dvh - 63px);
+  min-height: 0;
   width: 100%;
   overflow: hidden;
   background: #f0ede8;
+}
+
+/* O mapa deve acompanhar a área real disponível, inclusive em telas baixas. */
+.tela-mapa-unificada .mapa {
+  height: 100%;
+  min-height: 0;
 }
 
 /* -----------------------------------------------------------------------------
@@ -3493,7 +3500,7 @@ textarea.campo {
     display: inline-flex;
     position: absolute;
     right: 12px;
-    bottom: 14px;
+    bottom: max(24px, env(safe-area-inset-bottom));
     z-index: 1050;
     min-height: 42px;
     padding: 0 14px;
