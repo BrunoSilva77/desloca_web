@@ -11,7 +11,7 @@ services:
     runtime: node
     plan: free
     # Build: instala dependências e gera a pasta dist/
-    buildCommand: npm ci && npm run build
+    buildCommand: npm ci --include=dev && npm run build
     # Sobe o servidor estático (a PORT é definida pela Render)
     startCommand: npm start
     envVars:
