@@ -113,10 +113,29 @@ cd desloca_web
 npm install
 
 # 3. Inicie o servidor de desenvolvimento
-npm dev
+npm run dev
 ```
 
 Acesse **http://localhost:5173** 🚀
+
+### 🌐 Publicação no Render
+
+O protótipo já está pronto para subir no [Render](https://render.com):
+
+1. No painel do Render: **New + Web Service** e conecte o repositório
+   `BrunoSilva77/desloca_web`
+2. O Render detecta o [`render.yaml`](render.yaml) e usa automaticamente:
+   - build: `npm ci && npm run build` (gera a pasta `dist/`)
+   - start: `npm start` (sobe o servidor estático de produção)
+3. O servidor `scripts/servidor-estatico.mjs` serve o `dist/` com fallback
+   SPA — rotas como `/mapa` funcionam direto na URL
+
+Para testar a produção localmente:
+
+```bash
+npm run build   # gera a pasta dist/
+npm start       # http://localhost:4173 (ou PORT=xxxx npm start)
+```
 
 ### Banco de dados (fase de construção)
 

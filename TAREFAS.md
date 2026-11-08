@@ -118,6 +118,18 @@ git push
       reabre é o "◀ Linhas & Horários"). Capturas em `capturar_desenho.py`
       (desktop, detalhe, popup, mobile); `npm run build` sem erros e suíte de
       apresentação completa verde
+- [x] **08/11** — **Ajustes finais de apresentação + preparo Render**:
+      chips de partida removidas da barra (só o relógio simulado), aviso do
+      Modo Limpo virou só notificação (disparada ao desmarcar a última linha),
+      **2 veículos por linha = 8 ônibus** (2º sai meio intervalo depois, fila
+      de vagas reespacada 14–154 m, placa própria ABC-1D24), **busca por
+      destino** ("Para onde você vai?") com sugestão de paradas e cartão de
+      rota (direto ou com 1 baldeação — `src/utilidades/roteiro.ts`) e
+      **preparação para o Render** (`render.yaml` +
+      `scripts/servidor-estatico.mjs` com fallback SPA, `npm start`, seção
+      "Publicação no Render" no README). Testes atualizados para 8 ônibus e
+      verdes (`verificar_vagas_onibus.py`, `verificar_rotas_apresentacao.py`
+      com 30 amostras)
 
 ---
 
@@ -163,9 +175,10 @@ git push
 
 ### 🧹 Pendência de limpeza (decorrente do corte do login)
 
-- [ ] **Remover a tabela `usuarios`** do `banco/desloca.sql` (tem `senha_hash`)
-- [ ] **Tirar JWT e bcrypt** do `FERRAMENTAS.md` — senão alguém pergunta "e esse
-      JWT aqui?" na apresentação e a equipe fica sem resposta
+- [x] **Remover a tabela `usuarios`** do `banco/desloca.sql` (tem `senha_hash`)
+      — feito em 08/11 (banco ficou com 6 tabelas)
+- [x] **Tirar JWT e bcrypt** do `FERRAMENTAS.md` — feito em 08/11 (ficou uma
+      nota explicando que o protótipo não tem login)
 
 ---
 

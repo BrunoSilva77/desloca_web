@@ -1,0 +1,21 @@
+# =============================================================================
+# Hospedagem no Render (render.com)
+# =============================================================================
+# Serviço web que sobe o build do Vite com o servidor estático de produção
+# (scripts/servidor-estatico.mjs). A Render lê este arquivo automaticamente
+# quando o repositório é conectado via "New + Web Service".
+# =============================================================================
+services:
+  - type: web
+    name: desloca-web
+    runtime: node
+    plan: free
+    # Build: instala dependências e gera a pasta dist/
+    buildCommand: npm ci && npm run build
+    # Sobe o servidor estático (a PORT é definida pela Render)
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20.18.0
+      - key: NODE_ENV
+        value: production
