@@ -3478,11 +3478,17 @@ textarea.campo {
     font-size: 0.82rem;
   }
 
+  /* Painel de Linhas vira Bottom Sheet deslizante no Mobile */
   .botao-restaurar-painel {
-    display: none;
+    display: inline-flex;
+    top: auto;
+    right: 14px;
+    bottom: 18px;
+    height: 42px;
+    padding: 0 14px;
+    font-size: 0.78rem;
   }
 
-  /* Painel de Linhas vira Bottom Sheet deslizante no Mobile */
   .painel-linhas-integrado {
     top: auto;
     left: 0;
@@ -3506,6 +3512,18 @@ textarea.campo {
 
   .painel-touch-handle {
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    min-height: 52px;
+    touch-action: none;
+    user-select: none;
+  }
+
+  .texto-handle-mobile {
+    color: #716b63;
+    font-size: 0.68rem;
+    font-weight: 700;
   }
 
   .painel-linhas-integrado.mobile-fechado {

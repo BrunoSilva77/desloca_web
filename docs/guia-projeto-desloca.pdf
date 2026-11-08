@@ -1,0 +1,362 @@
+%PDF-1.4
+%âãÏÓ
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+3 0 obj
+<< /Length 2318 >>
+stream
+BT /F2 18 Tf 48 772 Td (Desloca explicado para uma criança de 10 anos) Tj ET
+BT /F2 13 Tf 48 729 Td (1. O que é o Desloca?) Tj ET
+BT /F1 9 Tf 48 699 Td (O Desloca é um site que ajuda as pessoas a andar de ônibus em Araçatuba.) Tj ET
+BT /F1 9 Tf 48 676 Td (Imagine que a cidade é um tabuleiro enorme. Os ônibus são peças que percorrem) Tj ET
+BT /F1 9 Tf 48 661 Td (caminhos, e o Desloca mostra:) Tj ET
+BT /F1 9 Tf 48 638 Td (? onde estão os ônibus;) Tj ET
+BT /F1 9 Tf 48 623 Td (? quais caminhos cada linha faz;) Tj ET
+BT /F1 9 Tf 48 608 Td (? onde ficam as paradas;) Tj ET
+BT /F1 9 Tf 48 593 Td (? quanto custa a passagem;) Tj ET
+BT /F1 9 Tf 48 578 Td (? se um ônibus está vazio, médio ou cheio;) Tj ET
+BT /F1 9 Tf 48 563 Td (? avisos de trânsito, obras e acidentes;) Tj ET
+BT /F1 9 Tf 48 548 Td (? um caminho sugerido para chegar a um destino.) Tj ET
+BT /F1 9 Tf 48 525 Td (O projeto é um protótipo. Por isso, muitos dados ainda são simulados, como se) Tj ET
+BT /F1 9 Tf 48 510 Td (fossem uma brincadeira de cidade feita no computador.) Tj ET
+BT /F2 13 Tf 48 474 Td (2. Como o projeto é organizado?) Tj ET
+BT /F1 9 Tf 48 444 Td (O projeto tem partes com trabalhos diferentes, como uma equipe:) Tj ET
+BT /F1 9 Tf 48 421 Td (? `src/`: o coração do site que aparece para o usuário;) Tj ET
+BT /F1 9 Tf 48 406 Td (? `src/paginas/`: telas completas, como Início e Mapa;) Tj ET
+BT /F1 9 Tf 48 391 Td (? `src/componentes/`: peças reutilizáveis, como cabeçalho, mapa e popups;) Tj ET
+BT /F1 9 Tf 48 376 Td (? `src/dados/`: informações simuladas de linhas, ônibus e rotas;) Tj ET
+BT /F1 9 Tf 48 361 Td (? `src/utilidades/`: pequenos ajudantes para cálculos;) Tj ET
+BT /F1 9 Tf 48 346 Td (? `scripts/`: ferramentas que criam rotas, buscam lugares e publicam o site;) Tj ET
+BT /F1 9 Tf 48 331 Td (? `testes/`: arquivos usados para conferir se o site está funcionando;) Tj ET
+BT /F1 9 Tf 48 316 Td (? `banco/`: desenho do banco de dados futuro;) Tj ET
+BT /F1 9 Tf 48 301 Td (? `docs/`: documentos e diagramas do projeto.) Tj ET
+BT /F2 13 Tf 48 265 Td (3. Tecnologias: as ferramentas da oficina) Tj ET
+BT /F2 11 Tf 48 227 Td (React) Tj ET
+BT /F1 9 Tf 48 204 Td (React monta o site usando peças pequenas. Em vez de construir uma casa inteira de) Tj ET
+BT /F1 9 Tf 48 189 Td (uma vez, fazemos porta, janela e parede separadas.) Tj ET
+endstream
+endobj
+4 0 obj
+<< /Length 1683 >>
+stream
+BT /F2 11 Tf 48 774 Td (TypeScript) Tj ET
+BT /F1 9 Tf 48 751 Td (TypeScript é um fiscal. Ele avisa quando o código espera um número, mas alguém) Tj ET
+BT /F1 9 Tf 48 736 Td (entrega um texto, por exemplo.) Tj ET
+BT /F2 11 Tf 48 705 Td (Vite) Tj ET
+BT /F1 9 Tf 48 682 Td (Vite é o ajudante que liga o projeto rapidamente durante o desenvolvimento e) Tj ET
+BT /F1 9 Tf 48 667 Td (prepara os arquivos para publicação.) Tj ET
+BT /F2 11 Tf 48 636 Td (React Router) Tj ET
+BT /F1 9 Tf 48 613 Td (React Router decide qual tela mostrar para cada endereço:) Tj ET
+BT /F1 9 Tf 48 590 Td (? `/` mostra o início;) Tj ET
+BT /F1 9 Tf 48 575 Td (? `/mapa` mostra o mapa;) Tj ET
+BT /F1 9 Tf 48 560 Td (? `/linhas` mostra a área de linhas;) Tj ET
+BT /F1 9 Tf 48 545 Td (? `/acessibilidade` mostra rotas acessíveis;) Tj ET
+BT /F1 9 Tf 48 530 Td (? `/denuncias` mostra o formulário de denúncia;) Tj ET
+BT /F1 9 Tf 48 515 Td (? `/dicas` mostra dicas;) Tj ET
+BT /F1 9 Tf 48 500 Td (? `/indice-movida` mostra os indicadores.) Tj ET
+BT /F2 11 Tf 48 469 Td (Leaflet e OpenStreetMap) Tj ET
+BT /F1 9 Tf 48 446 Td (Leaflet é o pincel do mapa. OpenStreetMap fornece o desenho das ruas. Juntos, eles) Tj ET
+BT /F1 9 Tf 48 431 Td (mostram linhas, pontos, ônibus e alertas.) Tj ET
+BT /F2 11 Tf 48 400 Td (Node.js) Tj ET
+BT /F1 9 Tf 48 377 Td (Node.js permite rodar JavaScript fora do navegador, principalmente no servidor.) Tj ET
+BT /F2 11 Tf 48 346 Td (MySQL) Tj ET
+BT /F1 9 Tf 48 323 Td (MySQL é como um armário com gavetas. Cada gaveta guarda um tipo de informação:) Tj ET
+BT /F1 9 Tf 48 308 Td (linhas, pontos, ônibus, alertas e denúncias.) Tj ET
+BT /F2 13 Tf 48 272 Td (4. Entrada do projeto e navegação) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Length 1585 >>
+stream
+BT /F2 11 Tf 48 774 Td (`src/main.tsx`) Tj ET
+BT /F1 9 Tf 48 751 Td (É a porta de entrada. Ele pega o componente principal e coloca dentro da página) Tj ET
+BT /F1 9 Tf 48 736 Td (HTML.) Tj ET
+BT /F2 11 Tf 48 705 Td (`src/App.tsx`) Tj ET
+BT /F1 9 Tf 48 682 Td (É o mapa de endereços do site. Ele usa o React Router e coloca o cabeçalho em) Tj ET
+BT /F1 9 Tf 48 667 Td (todas as telas.) Tj ET
+BT /F2 11 Tf 48 636 Td (`src/componentes/Cabecalho.tsx`) Tj ET
+BT /F1 9 Tf 48 613 Td (Mostra a marca Desloca e os links para o usuário trocar de tela.) Tj ET
+BT /F2 11 Tf 48 582 Td (`src/estilos/global.css`) Tj ET
+BT /F1 9 Tf 48 559 Td (É o livro de aparência do site: cores, tamanhos, fontes, espaços, botões e) Tj ET
+BT /F1 9 Tf 48 544 Td (adaptação para celular.) Tj ET
+BT /F2 13 Tf 48 508 Td (5. As páginas do site) Tj ET
+BT /F2 11 Tf 48 470 Td (`Inicio.tsx`) Tj ET
+BT /F1 9 Tf 48 447 Td (É a apresentação do projeto. Mostra o que o Desloca faz e leva o usuário para as) Tj ET
+BT /F1 9 Tf 48 432 Td (funções principais.) Tj ET
+BT /F2 11 Tf 48 401 Td (`Mapa.tsx`) Tj ET
+BT /F1 9 Tf 48 378 Td (É a tela mais importante. Ela junta mapa, lista de linhas, busca de destino,) Tj ET
+BT /F1 9 Tf 48 363 Td (alertas, notificações, denúncia e localização do usuário.) Tj ET
+BT /F1 9 Tf 48 340 Td (Quando a tela abre, nenhuma rota começa selecionada. Os ônibus continuam) Tj ET
+BT /F1 9 Tf 48 325 Td (aparecendo, mas os desenhos das rotas ficam escondidos para o mapa não ficar) Tj ET
+BT /F1 9 Tf 48 310 Td (poluído.) Tj ET
+BT /F1 9 Tf 48 287 Td (Quando o usuário clica em uma linha, o sistema:) Tj ET
+endstream
+endobj
+6 0 obj
+<< /Length 1535 >>
+stream
+BT /F1 9 Tf 48 790 Td (1. escolhe a linha;) Tj ET
+BT /F1 9 Tf 48 775 Td (2. coloca o trajeto dela no mapa;) Tj ET
+BT /F1 9 Tf 48 760 Td (3. aproxima o mapa;) Tj ET
+BT /F1 9 Tf 48 745 Td (4. mostra tarifa, frequência, placa, lotação e paradas;) Tj ET
+BT /F1 9 Tf 48 730 Td (5. permite clicar em cada parada.) Tj ET
+BT /F2 11 Tf 48 699 Td (`Linhas.tsx`) Tj ET
+BT /F1 9 Tf 48 676 Td (Atualmente encaminha para o mapa integrado, porque a lista de linhas foi colocada) Tj ET
+BT /F1 9 Tf 48 661 Td (dentro da tela do mapa.) Tj ET
+BT /F2 11 Tf 48 630 Td (`Acessibilidade.tsx`) Tj ET
+BT /F1 9 Tf 48 607 Td (Mostra exemplos de trajetos pensados para pessoas com mobilidade reduzida.) Tj ET
+BT /F2 11 Tf 48 576 Td (`Denuncias.tsx`) Tj ET
+BT /F1 9 Tf 48 553 Td (Permite relatar problemas, como buraco, iluminação, ponto ou ônibus.) Tj ET
+BT /F2 11 Tf 48 522 Td (`Dicas.tsx`) Tj ET
+BT /F1 9 Tf 48 499 Td (Apresenta dicas sobre mobilidade e sustentabilidade.) Tj ET
+BT /F2 11 Tf 48 468 Td (`IndiceMovida.tsx`) Tj ET
+BT /F1 9 Tf 48 445 Td (Mostra indicadores relacionados à mobilidade urbana.) Tj ET
+BT /F2 13 Tf 48 409 Td (6. Componentes reutilizáveis) Tj ET
+BT /F2 11 Tf 48 371 Td (`MapaDesloca.tsx`) Tj ET
+BT /F1 9 Tf 48 348 Td (É o componente que desenha o mapa Leaflet. Ele cria:) Tj ET
+BT /F1 9 Tf 48 325 Td (? mapa e ruas;) Tj ET
+BT /F1 9 Tf 48 310 Td (? marcador do terminal;) Tj ET
+BT /F1 9 Tf 48 295 Td (? marcadores dos ônibus;) Tj ET
+BT /F1 9 Tf 48 280 Td (? trajetos pontilhados;) Tj ET
+BT /F1 9 Tf 48 265 Td (? pontos de parada;) Tj ET
+endstream
+endobj
+7 0 obj
+<< /Length 1469 >>
+stream
+BT /F1 9 Tf 48 790 Td (? alertas;) Tj ET
+BT /F1 9 Tf 48 775 Td (? localização do usuário.) Tj ET
+BT /F1 9 Tf 48 752 Td (Cada linha tem dois ônibus simulados. Eles começam em vagas diferentes perto do) Tj ET
+BT /F1 9 Tf 48 737 Td (terminal e se movem pela rota usando animação.) Tj ET
+BT /F2 11 Tf 48 706 Td (`PopupDetalhesLinha.tsx`) Tj ET
+BT /F1 9 Tf 48 683 Td (Mostra informações extras de uma linha em uma janela pequena.) Tj ET
+BT /F2 11 Tf 48 652 Td (`PopupNotificacoes.tsx`) Tj ET
+BT /F1 9 Tf 48 629 Td (Mostra os avisos que estão acontecendo na cidade.) Tj ET
+BT /F2 11 Tf 48 598 Td (`PopupDenuncia.tsx`) Tj ET
+BT /F1 9 Tf 48 575 Td (É o formulário para o usuário enviar uma ocorrência.) Tj ET
+BT /F2 11 Tf 48 544 Td (`DicaNotificacao.tsx`) Tj ET
+BT /F1 9 Tf 48 521 Td (Mostra pequenas dicas durante o uso.) Tj ET
+BT /F2 11 Tf 48 490 Td (`Toast.tsx`) Tj ET
+BT /F1 9 Tf 48 467 Td (Mostra mensagens rápidas, como ?denúncia enviada?.) Tj ET
+BT /F2 13 Tf 48 431 Td (7. Dados das linhas e ônibus) Tj ET
+BT /F2 11 Tf 48 393 Td (`src/dados/linhas.ts`) Tj ET
+BT /F1 9 Tf 48 370 Td (É o cadastro das linhas simuladas. Hoje existem oito:) Tj ET
+BT /F1 9 Tf 48 347 Td (? 101 ? Circular Norte;) Tj ET
+BT /F1 9 Tf 48 332 Td (? 202 ? Circular Oeste;) Tj ET
+BT /F1 9 Tf 48 317 Td (? 303 ? Circular Sul;) Tj ET
+BT /F1 9 Tf 48 302 Td (? 404 ? Centro e Aeroporto;) Tj ET
+BT /F1 9 Tf 48 287 Td (? 505 ? Expresso Nordeste;) Tj ET
+BT /F1 9 Tf 48 272 Td (? 606 ? Universitário;) Tj ET
+endstream
+endobj
+8 0 obj
+<< /Length 1752 >>
+stream
+BT /F1 9 Tf 48 790 Td (? 707 ? Circular Sudoeste;) Tj ET
+BT /F1 9 Tf 48 775 Td (? 808 ? Expresso Aeroporto.) Tj ET
+BT /F1 9 Tf 48 752 Td (Cada cadastro guarda código, nome, cor, tarifa, frequência, status, horário,) Tj ET
+BT /F1 9 Tf 48 737 Td (placa, lotação e previsão.) Tj ET
+BT /F1 9 Tf 48 714 Td (Depois, o código junta esse cadastro com o caminho do arquivo `trajetos.json`.) Tj ET
+BT /F2 11 Tf 48 683 Td (`src/dados/trajetos.json`) Tj ET
+BT /F1 9 Tf 48 660 Td (Guarda muitos pontos de latitude e longitude. Eles formam o desenho que o ônibus) Tj ET
+BT /F1 9 Tf 48 645 Td (segue pelas ruas.) Tj ET
+BT /F1 9 Tf 48 622 Td (É parecido com uma lista de pegadas: juntando todas, aparece o caminho completo.) Tj ET
+BT /F2 13 Tf 48 586 Td (8. Busca de destino e roteiro) Tj ET
+BT /F2 11 Tf 48 548 Td (`src/utilidades/roteiro.ts`) Tj ET
+BT /F1 9 Tf 48 525 Td (Esse arquivo é o planejador de viagem.) Tj ET
+BT /F1 9 Tf 48 502 Td (O usuário escreve um destino. O sistema procura paradas cujo nome combina com o) Tj ET
+BT /F1 9 Tf 48 487 Td (texto. Depois tenta encontrar:) Tj ET
+BT /F1 9 Tf 48 464 Td (? uma linha direta; ou) Tj ET
+BT /F1 9 Tf 48 449 Td (? duas linhas com uma baldeação.) Tj ET
+BT /F1 9 Tf 48 426 Td (Para decidir, ele mede distâncias entre coordenadas usando a fórmula de Haversine.) Tj ET
+BT /F1 9 Tf 48 411 Td (Ela calcula a distância aproximada entre dois pontos da Terra.) Tj ET
+BT /F1 9 Tf 48 388 Td (Se o GPS não estiver disponível, o sistema usa o Terminal Urbano como ponto de) Tj ET
+BT /F1 9 Tf 48 373 Td (partida.) Tj ET
+BT /F2 13 Tf 48 337 Td (9. Outros ajudantes) Tj ET
+BT /F2 11 Tf 48 299 Td (`src/utilidades/geo.ts`) Tj ET
+BT /F1 9 Tf 48 276 Td (Calcula distância, tempo aproximado de caminhada e textos como ?450 m?.) Tj ET
+endstream
+endobj
+9 0 obj
+<< /Length 1676 >>
+stream
+BT /F2 11 Tf 48 790 Td (`src/utilidades/relogioSimulado.ts`) Tj ET
+BT /F1 9 Tf 48 767 Td (Cria o relógio e os horários simulados dos ônibus. O tempo da apresentação passa) Tj ET
+BT /F1 9 Tf 48 752 Td (mais rápido que o tempo real.) Tj ET
+BT /F2 13 Tf 48 716 Td (10. APIs e serviços externos) Tj ET
+BT /F2 11 Tf 48 678 Td (OSRM) Tj ET
+BT /F1 9 Tf 48 655 Td (OSRM é um serviço de rotas. O script envia pontos para ele e recebe um caminho) Tj ET
+BT /F1 9 Tf 48 640 Td (pelas ruas, em vez de uma linha reta atravessando casas.) Tj ET
+BT /F1 9 Tf 48 617 Td (O resultado é salvo em `src/dados/trajetos.json`.) Tj ET
+BT /F2 11 Tf 48 586 Td (OpenStreetMap / mapa de ruas) Tj ET
+BT /F1 9 Tf 48 563 Td (O mapa usa dados de ruas para o usuário reconhecer a cidade.) Tj ET
+BT /F2 11 Tf 48 532 Td (Nominatim) Tj ET
+BT /F1 9 Tf 48 509 Td (Alguns scripts usam geocodificação para transformar nomes de bairros e lugares em) Tj ET
+BT /F1 9 Tf 48 494 Td (coordenadas.) Tj ET
+BT /F2 11 Tf 48 463 Td (API REST e WebSocket planejados) Tj ET
+BT /F1 9 Tf 48 440 Td (A documentação prevê um backend com Express para fornecer linhas, pontos, alertas) Tj ET
+BT /F1 9 Tf 48 425 Td (e denúncias.) Tj ET
+BT /F1 9 Tf 48 402 Td (Também prevê Socket.IO para enviar posições de ônibus imediatamente. No protótipo) Tj ET
+BT /F1 9 Tf 48 387 Td (atual, os dados principais ainda são simulados no front-end.) Tj ET
+BT /F2 13 Tf 48 351 Td (11. Scripts de criação e manutenção) Tj ET
+BT /F2 11 Tf 48 313 Td (`gerar_rotas_apresentacao.py`) Tj ET
+BT /F1 9 Tf 48 290 Td (É o motorista que prepara os caminhos. Ele pega pontos de cada linha, conversa com) Tj ET
+BT /F1 9 Tf 48 275 Td (o OSRM e grava os trajetos.) Tj ET
+endstream
+endobj
+10 0 obj
+<< /Length 1643 >>
+stream
+BT /F2 11 Tf 48 782 Td (`buscar_bairros.py`) Tj ET
+BT /F1 9 Tf 48 759 Td (Busca bairros e suas coordenadas.) Tj ET
+BT /F2 11 Tf 48 728 Td (`buscar_pois.py` e `buscar_pois_2.py`) Tj ET
+BT /F1 9 Tf 48 705 Td (Buscam pontos importantes, como hospital, shopping e aeroporto.) Tj ET
+BT /F2 11 Tf 48 674 Td (`recortar_logo.py`) Tj ET
+BT /F1 9 Tf 48 651 Td (Ajuda a preparar imagens da marca.) Tj ET
+BT /F2 11 Tf 48 620 Td (`servidor-estatico.mjs`) Tj ET
+BT /F1 9 Tf 48 597 Td (Entrega os arquivos finais do site. Se alguém abrir `/mapa` diretamente, ele) Tj ET
+BT /F1 9 Tf 48 582 Td (devolve o `index.html` para o React entender a rota.) Tj ET
+BT /F2 11 Tf 48 551 Td (`atualizar_pr.ps1`) Tj ET
+BT /F1 9 Tf 48 528 Td (Ajuda em tarefas de atualização de pull request no GitHub.) Tj ET
+BT /F2 13 Tf 48 492 Td (12. Banco de dados) Tj ET
+BT /F2 11 Tf 48 454 Td (`banco/desloca.sql`) Tj ET
+BT /F1 9 Tf 48 431 Td (Desenha o banco MySQL para uma versão mais completa do sistema.) Tj ET
+BT /F1 9 Tf 48 408 Td (As tabelas são:) Tj ET
+BT /F1 9 Tf 48 385 Td (? `linhas`: dados das linhas;) Tj ET
+BT /F1 9 Tf 48 370 Td (? `pontos`: paradas e coordenadas;) Tj ET
+BT /F1 9 Tf 48 355 Td (? `linha_ponto`: ordem das paradas em cada linha;) Tj ET
+BT /F1 9 Tf 48 340 Td (? `veiculos`: placas, modelos e posição conhecida;) Tj ET
+BT /F1 9 Tf 48 325 Td (? `alertas`: avisos de trânsito, acidentes, clima e obras;) Tj ET
+BT /F1 9 Tf 48 310 Td (? `denuncias`: problemas enviados pelos usuários.) Tj ET
+BT /F1 9 Tf 48 287 Td (A tabela `linha_ponto` é uma ponte. Ela diz quais pontos pertencem a cada linha e) Tj ET
+BT /F1 9 Tf 48 272 Td (em que ordem o ônibus passa.) Tj ET
+endstream
+endobj
+11 0 obj
+<< /Length 1981 >>
+stream
+BT /F1 9 Tf 48 782 Td (A posição ao vivo não precisa ser gravada a cada segundo no banco. Ela pode ficar) Tj ET
+BT /F1 9 Tf 48 767 Td (na memória do servidor e ser enviada por WebSocket.) Tj ET
+BT /F2 13 Tf 48 731 Td (13. Testes) Tj ET
+BT /F1 9 Tf 48 701 Td (A pasta `testes/` reúne verificações e imagens de conferência.) Tj ET
+BT /F1 9 Tf 48 678 Td (Os testes podem:) Tj ET
+BT /F1 9 Tf 48 655 Td (? abrir o site;) Tj ET
+BT /F1 9 Tf 48 640 Td (? conferir se botões existem;) Tj ET
+BT /F1 9 Tf 48 625 Td (? clicar em linhas;) Tj ET
+BT /F1 9 Tf 48 610 Td (? verificar o mapa;) Tj ET
+BT /F1 9 Tf 48 595 Td (? capturar telas;) Tj ET
+BT /F1 9 Tf 48 580 Td (? observar mensagens do navegador;) Tj ET
+BT /F1 9 Tf 48 565 Td (? verificar responsividade em tamanhos diferentes;) Tj ET
+BT /F1 9 Tf 48 550 Td (? conferir posições dos ônibus e vagas do terminal.) Tj ET
+BT /F1 9 Tf 48 527 Td (As imagens PNG ajudam a comparar o que o site realmente mostra com o que a equipe) Tj ET
+BT /F1 9 Tf 48 512 Td (esperava.) Tj ET
+BT /F2 13 Tf 48 476 Td (14. Como rodar) Tj ET
+BT /F1 9 Tf 48 446 Td (1. Instale Node.js 18 ou superior.) Tj ET
+BT /F1 9 Tf 48 431 Td (2. Abra o terminal na pasta do projeto.) Tj ET
+BT /F1 9 Tf 48 416 Td (3. Execute `npm install`.) Tj ET
+BT /F1 9 Tf 48 401 Td (4. Execute `npm run dev`.) Tj ET
+BT /F1 9 Tf 48 386 Td (5. Abra `http://localhost:5173`.) Tj ET
+BT /F1 9 Tf 48 363 Td (Para testar a versão de produção:) Tj ET
+BT /F1 9 Tf 48 340 Td (1. Execute `npm run build`.) Tj ET
+BT /F1 9 Tf 48 325 Td (2. Execute `npm start`.) Tj ET
+BT /F1 9 Tf 48 310 Td (3. Abra a porta mostrada no terminal, normalmente `http://localhost:4173`.) Tj ET
+BT /F2 13 Tf 48 274 Td (15. Como o usuário faz uma viagem?) Tj ET
+BT /F1 9 Tf 48 244 Td (1. A pessoa abre o mapa.) Tj ET
+BT /F1 9 Tf 48 229 Td (2. O mapa mostra os ônibus, sem desenhar todas as rotas de uma vez.) Tj ET
+BT /F1 9 Tf 48 214 Td (3. Ela escreve um destino.) Tj ET
+BT /F1 9 Tf 48 199 Td (4. O Desloca sugere paradas.) Tj ET
+endstream
+endobj
+12 0 obj
+<< /Length 1186 >>
+stream
+BT /F1 9 Tf 48 790 Td (5. A pessoa escolhe uma parada.) Tj ET
+BT /F1 9 Tf 48 775 Td (6. O sistema procura uma linha direta ou uma baldeação.) Tj ET
+BT /F1 9 Tf 48 760 Td (7. O mapa destaca as linhas usadas.) Tj ET
+BT /F1 9 Tf 48 745 Td (8. A pessoa pode abrir os detalhes, ver pontos e acompanhar os ônibus.) Tj ET
+BT /F2 13 Tf 48 709 Td (16. Resumo final) Tj ET
+BT /F1 9 Tf 48 679 Td (O Desloca funciona como uma pequena central de ônibus:) Tj ET
+BT /F1 9 Tf 48 656 Td (? React constrói as telas;) Tj ET
+BT /F1 9 Tf 48 641 Td (? TypeScript ajuda a evitar erros;) Tj ET
+BT /F1 9 Tf 48 626 Td (? Leaflet desenha o mapa;) Tj ET
+BT /F1 9 Tf 48 611 Td (? OSRM ajuda a criar caminhos reais;) Tj ET
+BT /F1 9 Tf 48 596 Td (? scripts preparam dados;) Tj ET
+BT /F1 9 Tf 48 581 Td (? o banco guarda informações permanentes;) Tj ET
+BT /F1 9 Tf 48 566 Td (? testes conferem se tudo aparece corretamente;) Tj ET
+BT /F1 9 Tf 48 551 Td (? o servidor entrega o site para o navegador.) Tj ET
+BT /F1 9 Tf 48 528 Td (Mesmo sendo um protótipo, a estrutura já separa as responsabilidades. Isso) Tj ET
+BT /F1 9 Tf 48 513 Td (facilita trocar os dados simulados por uma API e por ônibus reais no futuro.) Tj ET
+endstream
+endobj
+13 0 obj
+<< /Type /Pages /Kids [14 0 R 15 0 R 16 0 R 17 0 R 18 0 R 19 0 R 20 0 R 21 0 R 22 0 R 23 0 R] /Count 10 >>
+endobj
+14 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 3 0 R >>
+endobj
+15 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 4 0 R >>
+endobj
+16 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 5 0 R >>
+endobj
+17 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 6 0 R >>
+endobj
+18 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 7 0 R >>
+endobj
+19 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 8 0 R >>
+endobj
+20 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 9 0 R >>
+endobj
+21 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 10 0 R >>
+endobj
+22 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 11 0 R >>
+endobj
+23 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 12 0 R >>
+endobj
+24 0 obj
+<< /Type /Catalog /Pages 13 0 R >>
+endobj
+xref
+0 25
+0000000000 65535 f 
+0000000015 00000 n 
+0000000085 00000 n 
+0000000160 00000 n 
+0000002530 00000 n 
+0000004265 00000 n 
+0000005902 00000 n 
+0000007489 00000 n 
+0000009010 00000 n 
+0000010814 00000 n 
+0000012542 00000 n 
+0000014238 00000 n 
+0000016272 00000 n 
+0000017511 00000 n 
+0000017634 00000 n 
+0000017772 00000 n 
+0000017910 00000 n 
+0000018048 00000 n 
+0000018186 00000 n 
+0000018324 00000 n 
+0000018462 00000 n 
+0000018600 00000 n 
+0000018739 00000 n 
+0000018878 00000 n 
+0000019017 00000 n 
+trailer
+<< /Size 25 /Root 24 0 R >>
+startxref
+19068
+%%EOF

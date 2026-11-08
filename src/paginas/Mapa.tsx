@@ -11,7 +11,7 @@
 //   6. Notificações ("Tudo que tá rolando") e Denúncias integradas na tela.
 // =============================================================================
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import MapaDesloca from '../componentes/MapaDesloca'
 import PopupNotificacoes from '../componentes/PopupNotificacoes'
@@ -118,8 +118,24 @@ export default function Mapa() {
   // Modais flutuantes e estado dos painéis
   const [mostrarNotificacoes, setMostrarNotificacoes] = useState(false)
   const [mostrarDenuncia, setMostrarDenuncia] = useState(false)
-  const [painelAbertoMobile, setPainelAbertoMobile] = useState(true)
+  // No mobile, o mapa abre livre e o painel pode ser puxado como uma gaveta.
+  const [painelAbertoMobile, setPainelAbertoMobile] = useState(false)
   const [painelMinimizadoDesktop, setPainelMinimizadoDesktop] = useState(false)
+  const inicioArrastePainel = useRef<number | null>(null)
+
+  function iniciarArrastePainel(evento: React.TouchEvent<HTMLDivElement>) {
+    inicioArrastePainel.current = evento.touches[0]?.clientY ?? null
+  }
+
+  function terminarArrastePainel(evento: React.TouchEvent<HTMLDivElement>) {
+    const inicio = inicioArrastePainel.current
+    inicioArrastePainel.current = null
+    if (inicio === null) return
+
+    const deslocamento = evento.changedTouches[0]?.clientY - inicio
+    if (deslocamento < -35) setPainelAbertoMobile(true)
+    if (deslocamento > 35) setPainelAbertoMobile(false)
+  }
 
   // Notificações e alertas dinâmicos
   const [alertasLista, setAlertasLista] = useState<Alerta[]>(ALERTAS)
@@ -337,11 +353,15 @@ export default function Mapa() {
   // Seleção e interação com a Linha
   // ---------------------------------------------------------------------------
   function selecionarLinha(linha: Linha) {
-    setLinhaSelecionada(linha)
+    // Sempre usa a instância canônica da lista para que cards, ônibus e rotas
+    // tenham exatamente o mesmo comportamento, inclusive nas linhas novas.
+    const linhaAtual = LINHAS.find((item) => item.id === linha.id) ?? linha
+    setLinhaSelecionada(linhaAtual)
+    setLinhasVisiveisIds((ids) => (ids.includes(linhaAtual.id) ? ids : [...ids, linhaAtual.id]))
     setPainelAbertoMobile(true)
     setPainelMinimizadoDesktop(false)
     dispararDica(
-      `Linha ${linha.codigo}: Toque em qualquer ponto de parada da lista para aproximar o mapa!`
+      `Linha ${linhaAtual.codigo}: Toque em qualquer ponto de parada da lista para aproximar o mapa!`
     )
   }
 
@@ -550,9 +570,17 @@ export default function Mapa() {
         <div
           className="painel-touch-handle"
           onClick={() => setPainelAbertoMobile((prev) => !prev)}
-          aria-hidden="true"
+          onTouchStart={iniciarArrastePainel}
+          onTouchEnd={terminarArrastePainel}
+          role="button"
+          tabIndex={0}
+          aria-label={painelAbertoMobile ? 'Minimizar lista de linhas' : 'Abrir lista de linhas'}
+          title={painelAbertoMobile ? 'Puxe para baixo para minimizar' : 'Puxe para cima para abrir'}
         >
           <div className="barra-puxar" />
+          <span className="texto-handle-mobile">
+            {painelAbertoMobile ? 'Puxe para baixo para ver o mapa' : 'Puxe para cima para ver as linhas'}
+          </span>
         </div>
 
         {/* =====================================================================
