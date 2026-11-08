@@ -21,6 +21,14 @@ import Toast from '../componentes/Toast'
 import { LINHAS, ALERTAS, type Linha, type Alerta } from '../dados/linhas'
 import { distanciaKm, tempoCaminhadaMin, formatarDistancia } from '../utilidades/geo'
 import { formatarRelogio, proximaPartida, desdeUltimaPartida } from '../utilidades/relogioSimulado'
+import {
+  destinosPorTexto,
+  linhasNoDestino,
+  calcularRoteiro,
+  type Parada,
+  type Roteiro,
+} from '../utilidades/roteiro'
+import { COORD_TERMINAL } from '../componentes/MapaDesloca'
 
 // Próxima partida de uma linha no relógio simulado (para a placa de partidas)
 function proximaPartidaLinha(linha: Linha): number {
@@ -66,8 +74,10 @@ function IconeOnibus({ cor }: { cor: string }) {
 export default function Mapa() {
   const [searchParams] = useSearchParams()
 
-  // Estados de busca e filtros
-  const [busca, setBusca] = useState('')
+  // Busca por DESTINO ("Para onde você vai?"): o texto digitado vira
+  // sugestão de paradas; escolher uma calcula o roteiro de ônibus
+  const [buscaDestino, setBuscaDestino] = useState('')
+  const [roteiro, setRoteiro] = useState<Roteiro | null>(null)
   const [filtroStatus, setFiltroStatus] = useState<'todas' | 'operacao'>('todas')
 
   // Linhas cujos trajetos e pontos serão desenhados no mapa (vazio = modo limpo, só ônibus andando!)
@@ -214,20 +224,56 @@ export default function Mapa() {
   const pontoMaisProximo = pontosProximos[0]
 
   // ---------------------------------------------------------------------------
-  // Filtragem das linhas da lista
+  // Busca por destino: sugestões de paradas + cálculo do roteiro de ônibus
+  // ---------------------------------------------------------------------------
+  const destinosSugeridos = useMemo(() => destinosPorTexto(buscaDestino), [buscaDestino])
+
+  // Escolheu um destino: monta o roteiro (direto ou com baldeação) a partir
+  // da localização atual (ou do Terminal, se o GPS não estiver disponível)
+  function escolherDestino(destino: Parada) {
+    const origemCoords = minhaPosicao ?? COORD_TERMINAL
+    const origemNome = minhaPosicao ? 'sua localização' : 'Terminal Urbano'
+    const novoRoteiro = calcularRoteiro(destino, origemCoords, origemNome)
+
+    setBuscaDestino(destino.nome)
+    setRoteiro(novoRoteiro)
+    setFocoCoords(destino.coords)
+    setLinhaSelecionada(null)
+
+    if (novoRoteiro) {
+      // Deixa no mapa só as linhas do roteiro sugerido
+      setLinhasVisiveisIds([...new Set(novoRoteiro.pernas.map((p) => p.linha.id))])
+      const codigos = novoRoteiro.pernas.map((p) => p.linha.codigo).join(' → ')
+      dispararDica(
+        novoRoteiro.pernas.length === 1
+          ? `Rota para ${destino.nome}: pegue a linha ${codigos}.`
+          : `Rota para ${destino.nome} com baldeação: ${codigos}.`
+      )
+    } else {
+      dispararDica(
+        `Nenhuma linha encontrada de ${origemNome} até ${destino.nome} — tente outro destino.`
+      )
+    }
+  }
+
+  // Limpa a rota sugerida e volta a busca ao estado inicial
+  function limparRoteiro() {
+    setRoteiro(null)
+    setBuscaDestino('')
+  }
+
+  // ---------------------------------------------------------------------------
+  // Filtragem das linhas da lista (por status; a lista não é filtrada mais
+  // por texto — a busca virou busca de DESTINO com sugestão de roteiro)
   // ---------------------------------------------------------------------------
   const linhasFiltradas = useMemo(() => {
     return LINHAS.filter((linha) => {
-      const coincideBusca =
-        linha.nome.toLowerCase().includes(busca.toLowerCase()) ||
-        linha.codigo.toLowerCase().includes(busca.toLowerCase())
-
       const coincideStatus =
         filtroStatus === 'todas' ? true : linha.status === 'operacao'
 
-      return coincideBusca && coincideStatus
+      return coincideStatus
     })
-  }, [busca, filtroStatus])
+  }, [filtroStatus])
 
   // ---------------------------------------------------------------------------
   // Linhas cujos trajetos e paradas serão desenhados no mapa
@@ -242,12 +288,11 @@ export default function Mapa() {
 
   // Todas as linhas marcadas?
   const todasMarcadas = linhasVisiveisIds.length === LINHAS.length
-  const nenhumaMarcada = linhasVisiveisIds.length === 0
 
   function alternarTodas() {
     if (todasMarcadas) {
       setLinhasVisiveisIds([])
-      dispararDica('Modo limpo ativado: apenas os marcadores de ônibus continuam no mapa!')
+      dispararDica('Modo limpo ativo: apenas a localização dos ônibus está visível no mapa. Marque a caixa de uma linha para traçar seu trajeto.')
     } else {
       setLinhasVisiveisIds(LINHAS.map((l) => l.id))
       dispararDica('Exibindo todos os trajetos e pontos de parada no mapa.')
@@ -259,7 +304,7 @@ export default function Mapa() {
     setLinhasVisiveisIds((atual) => {
       const novo = atual.includes(id) ? atual.filter((item) => item !== id) : [...atual, id]
       if (novo.length === 0) {
-        dispararDica('Nenhum trajeto selecionado. Apenas os ônibus continuam visíveis no mapa.')
+        dispararDica('Modo limpo ativo: apenas a localização dos ônibus está visível no mapa. Marque a caixa de uma linha para traçar seu trajeto.')
       } else {
         dispararDica(`Trajeto atualizado no mapa (${novo.length} visíveis).`)
       }
@@ -364,27 +409,12 @@ export default function Mapa() {
           BARRA DE AÇÕES FLUTUANTES (Top bar sobre o mapa)
       ------------------------------------------------------------------------- */}
       <div className="acoes-flutuantes-mapa" role="toolbar" aria-label="Ações do mapa">
-        {/* Placa de partidas: relógio simulado + horário de saída de cada linha.
-            O relógio corre 10x mais rápido que o real e as chips recalculam a
-            cada segundo junto com ele */}
-        <div className="placa-partidas" aria-label="Placa de partidas simulada">
+        {/* Relógio da simulação: corre 10x mais rápido que o real e mostra o
+            horário das partidas no mapa */}
+        <div className="placa-partidas" aria-label="Relógio da simulação">
           <span className="relogio-simulado" aria-label="Horário da simulação">
             🕐 <b>{horaSimulada}</b>
           </span>
-          <span className="placa-separador" aria-hidden="true" />
-          <div className="placa-chips">
-            {LINHAS.filter((linha) => linha.status === 'operacao').map((linha) => (
-              <span
-                key={linha.id}
-                className={`partida-chip ${estaEmRota(linha) ? 'em-rota' : ''}`}
-              >
-                <b>{linha.codigo}</b>
-                <span className="partida-valor">
-                  {estaEmRota(linha) ? 'em rota' : formatarRelogio(proximaPartidaLinha(linha))}
-                </span>
-              </span>
-            ))}
-          </div>
         </div>
 
         {/* Sino de Notificações com badge de novidades */}
@@ -694,22 +724,110 @@ export default function Mapa() {
               </button>
             </div>
 
-            {/* Campo de pesquisa de linhas */}
+            {/* Busca por DESTINO: digitar começa a sugerir paradas; escolher
+                uma delas calcula o roteiro de ônibus até lá */}
             <div className="campo-pesquisa-container">
               <input
                 className="campo campo-busca-linha"
                 type="search"
-                placeholder="Buscar linha (ex: 101, Centro)..."
-                value={busca}
+                placeholder="Para onde você vai? (ex: Zoológico, Aeroporto)..."
+                value={buscaDestino}
                 onChange={(e) => {
-                  setBusca(e.target.value)
-                  if (e.target.value) {
-                    dispararDica('Dica: Você pode digitar o número da linha ou o nome do bairro.')
-                  }
+                  setBuscaDestino(e.target.value)
+                  setRoteiro(null)
                 }}
-                aria-label="Buscar linha de ônibus"
+                aria-label="Para onde você vai"
               />
+
+              {/* Sugestões de destino enquanto digita (só se ainda não escolheu) */}
+              {!roteiro && destinosSugeridos.length > 0 && (
+                <ul className="lista-destinos">
+                  {destinosSugeridos.map((destino) => (
+                    <li key={destino.nome}>
+                      <button
+                        type="button"
+                        className="item-destino"
+                        onClick={() => escolherDestino(destino)}
+                      >
+                        <span className="item-destino-icone" aria-hidden="true">
+                          🚏
+                        </span>
+                        <span className="item-destino-texto">
+                          <strong>{destino.nome}</strong>
+                          <small>Linhas {linhasNoDestino(destino).join(' · ')}</small>
+                        </span>
+                        <span className="item-destino-seta" aria-hidden="true">
+                          ›
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
+
+            {/* Roteiro sugerido (origem → destino,1 ou 2 linhas) */}
+            {roteiro && (
+              <div className="sugestao-rota">
+                <div className="sugestao-rota-topo">
+                  <div>
+                    <small>Rota sugerida</small>
+                    <strong>🚏 {roteiro.destino.nome}</strong>
+                  </div>
+                  <button
+                    type="button"
+                    className="sugestao-fechar"
+                    onClick={limparRoteiro}
+                    aria-label="Limpar rota sugerida"
+                    title="Limpar rota"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <p className="sugestao-origem">
+                  Partindo de <b>{roteiro.origem.nome}</b>
+                  {roteiro.pernas.length > 1 && ' · troca de ônibus no caminho'}
+                </p>
+
+                <ol className="sugestao-pernas">
+                  {roteiro.pernas.map((perna, indice) => (
+                    <li key={`${perna.linha.id}-${indice}`}>
+                      <span
+                        className="badge-codigo"
+                        style={{ '--cor-linha': perna.linha.cor } as React.CSSProperties}
+                      >
+                        {perna.linha.codigo}
+                      </span>
+                      <div className="perna-info">
+                        <strong>{perna.linha.nome}</strong>
+                        <small>
+                          Embarque: {perna.embarque.nome}
+                          {perna.caminhadaM > 0 && ` · ${perna.caminhadaM} m a pé`}
+                        </small>
+                        {indice === 0 && roteiro.baldeacao && (
+                          <small className="perna-baldeacao">
+                            Baldeação: {roteiro.baldeacao.nome}
+                          </small>
+                        )}
+                        <small>Desembarque: {perna.desembarque.nome}</small>
+                      </div>
+                      <button
+                        type="button"
+                        className="perna-ver"
+                        onClick={() => selecionarLinha(perna.linha)}
+                        title={`Ver detalhes da linha ${perna.linha.codigo}`}
+                      >
+                        Ver
+                      </button>
+                    </li>
+                  ))}
+                </ol>
+
+                <p className="sugestao-nota">
+                  + {roteiro.caminhadaDesembarqueM} m a pé até {roteiro.destino.nome}
+                </p>
+              </div>
+            )}
 
             {/* Filtros rápidos de status */}
             <div className="filtros-status-tags">
@@ -748,15 +866,9 @@ export default function Mapa() {
               </span>
             </button>
 
-            {/* Aviso quando nenhuma linha está marcada (Modo Limpo ativo) */}
-            {nenhumaMarcada && (
-              <div className="aviso-modo-limpo" role="status">
-                <span aria-hidden="true">🚌</span>
-                <p>
-                  <b>Modo limpo ativo:</b> Apenas a localização dos ônibus está visível no mapa. Marque a caixa de uma linha abaixo para traçar seu trajeto.
-                </p>
-              </div>
-            )}
+            {/* Aviso do Modo Limpo NÃO fica mais fixo no painel: ele aparece
+                só como notificação (dica) no momento em que a última rota é
+                desmarcada — ver alternarTodas / alternarLinhaVisibilidade */}
 
             {/* Lista dos cards de linhas */}
             <ul className="lista-filtros">
@@ -832,7 +944,7 @@ export default function Mapa() {
 
               {linhasFiltradas.length === 0 && (
                 <li className="vazio">
-                  <span>🔍 Nenhuma linha encontrada para "{busca}".</span>
+                  <span>🔍 Nenhuma linha neste filtro.</span>
                 </li>
               )}
             </ul>

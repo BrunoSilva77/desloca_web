@@ -1989,66 +1989,18 @@ textarea.campo {
 }
 
 /* -----------------------------------------------------------------------------
-   PLACA DE PARTIDAS (relógio simulado + horário de saída de cada linha)
+   PLACA DO RELÓGIO (hora fictícia da simulação da apresentação)
    ----------------------------------------------------------------------------- */
 .placa-partidas {
   display: inline-flex;
   align-items: center;
   height: 46px;
-  padding: 0 6px;
   border-radius: 6px;
   background: rgba(29, 29, 27, 0.95);
   border: 1px solid rgba(201, 168, 130, 0.4);
   backdrop-filter: blur(8px);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
   user-select: none;
-}
-
-.placa-separador {
-  width: 1px;
-  align-self: stretch;
-  margin: 9px 4px;
-  background: rgba(250, 248, 244, 0.18);
-}
-
-.placa-chips {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 0 6px;
-}
-
-/* Chip de uma linha: código + horário da próxima partida (tabular) */
-.partida-chip {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 6px;
-  padding: 5px 8px;
-  border-radius: 4px;
-  transition: background 0.15s;
-}
-
-.partida-chip b {
-  color: var(--bege);
-  font-size: 0.82rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-
-.partida-chip .partida-valor {
-  color: #faf8f4;
-  font-size: 0.8rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-/* Linha cujo ônibus está circulando agora: chip ganha fundo âmbar escuro */
-.partida-chip.em-rota {
-  background: rgba(201, 168, 130, 0.2);
-}
-
-.partida-chip.em-rota .partida-valor {
-  color: var(--bege);
 }
 
 /* -----------------------------------------------------------------------------
@@ -2217,26 +2169,6 @@ textarea.campo {
   }
 }
 
-/* Aviso de Modo Limpo (apenas ônibus no mapa): etiqueta com fio âmbar */
-.aviso-modo-limpo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: rgba(201, 168, 130, 0.16);
-  border: 1px solid rgba(201, 168, 130, 0.55);
-  padding: 10px 12px;
-  border-radius: 4px;
-  margin-bottom: 12px;
-  font-size: 0.8rem;
-  color: var(--preto);
-  line-height: 1.4;
-}
-
-.aviso-modo-limpo span {
-  font-size: 1.3rem;
-  line-height: 1;
-}
-
 /* -----------------------------------------------------------------------------
    PAINEL INTEGRADO DE LINHAS & DETALHES
    ----------------------------------------------------------------------------- */
@@ -2351,6 +2283,203 @@ textarea.campo {
 .campo-busca-linha:focus {
   background: #fff;
   border-color: var(--preto);
+}
+
+/* Sugestões de destino da busca (dropdown em fluxo, empurra a lista) */
+.lista-destinos {
+  list-style: none;
+  margin-top: 6px;
+  border: 1px solid #e6e0d5;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.item-destino {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #f0ebe2;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.lista-destinos li:last-child .item-destino {
+  border-bottom: none;
+}
+
+.item-destino:hover {
+  background: rgba(201, 168, 130, 0.16);
+}
+
+.item-destino-icone {
+  font-size: 1rem;
+}
+
+.item-destino-texto {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.item-destino-texto strong {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--preto);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-destino-texto small {
+  font-size: 0.72rem;
+  color: var(--cinza);
+}
+
+.item-destino-seta {
+  color: #a49f97;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+/* Roteiro sugerido (origem → destino): cartão de tinta no topo do painel */
+.sugestao-rota {
+  background: var(--preto);
+  border: 1px solid rgba(201, 168, 130, 0.45);
+  border-radius: 6px;
+  padding: 12px 12px 10px;
+  margin-bottom: 14px;
+  color: #faf8f4;
+}
+
+.sugestao-rota-topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sugestao-rota-topo small {
+  display: block;
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: rgba(250, 248, 244, 0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.sugestao-rota-topo strong {
+  font-size: 0.98rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.sugestao-fechar {
+  background: transparent;
+  border: 1px solid rgba(201, 168, 130, 0.5);
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  color: var(--bege);
+  font-size: 0.8rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.sugestao-fechar:hover {
+  background: var(--bege);
+  color: var(--preto);
+}
+
+.sugestao-origem {
+  font-size: 0.75rem;
+  color: rgba(250, 248, 244, 0.7);
+  margin: 6px 0 8px;
+}
+
+.sugestao-origem b {
+  color: var(--bege);
+}
+
+/* Trechos do roteiro: uma linha por perna (1 = direto, 2 = baldeação) */
+.sugestao-pernas {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sugestao-pernas li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(250, 248, 244, 0.07);
+  border: 1px solid rgba(250, 248, 244, 0.14);
+  border-radius: 4px;
+  padding: 8px 9px;
+}
+
+.sugestao-pernas .badge-codigo {
+  background: #faf8f4;
+  color: var(--preto);
+  min-width: 40px;
+  height: 28px;
+  font-size: 0.9rem;
+  box-shadow: inset 0 -3px 0 var(--cor-linha, var(--bege));
+}
+
+.perna-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.perna-info strong {
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.perna-info small {
+  font-size: 0.7rem;
+  color: rgba(250, 248, 244, 0.65);
+}
+
+.perna-baldeacao {
+  color: var(--bege) !important;
+  font-weight: 700;
+}
+
+.perna-ver {
+  background: transparent;
+  border: 1px solid rgba(201, 168, 130, 0.55);
+  border-radius: 4px;
+  color: var(--bege);
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 5px 9px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.perna-ver:hover {
+  background: var(--bege);
+  color: var(--preto);
+}
+
+.sugestao-nota {
+  font-size: 0.7rem;
+  color: rgba(250, 248, 244, 0.55);
+  margin-top: 8px;
 }
 
 /* Tags de filtro de status */
@@ -3333,12 +3462,7 @@ textarea.campo {
     gap: 8px;
   }
 
-  /* No celular sobra espaço só para o relógio: as chips de partida saem */
-  .placa-chips,
-  .placa-separador {
-    display: none;
-  }
-
+  /* No celular a placa do relógio mantém a altura compacta */
   .placa-partidas {
     height: 42px;
   }

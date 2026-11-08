@@ -43,7 +43,7 @@ type Props = {
 
 // Distância em metros entre duas coordenadas (fórmula de Haversine),
 // usada para calcular a velocidade da animação dos ônibus
-function metrosEntre(a: [number, number], b: [number, number]) {
+export function metrosEntre(a: [number, number], b: [number, number]) {
   const RAIO = 6371000
   const dLat = ((b[0] - a[0]) * Math.PI) / 180
   const dLng = ((b[1] - a[1]) * Math.PI) / 180
@@ -57,19 +57,44 @@ function metrosEntre(a: [number, number], b: [number, number]) {
 
 // Distâncias (em metros) de cada ônibus até o Terminal quando está esperando
 // na vaga. As 4 linhas começam pelo MESMO trecho de rua, então as vagas viram
-// uma "fila" na rua de saída do Terminal (15, 35, 55 e 75 m): os ônibus ficam
-// em volta do terminal, alinhados na via, e na partida seguem pelo trajeto
-// normal — sem pular quarteirão nem parar em ponto aleatório.
-const DISTANCIAS_VAGA_M: Record<number, number> = {
-  1: 15,
-  2: 35,
-  3: 55,
-  4: 75,
+// uma "fila" na rua de saída do Terminal: os ônibus ficam em volta do
+// terminal, alinhados na via, e na partida seguem pelo trajeto normal —
+// sem pular quarteirão nem parar em ponto aleatório.
+// Cada linha tem 2 veículos (chave "id-veiculo") e cada um tem sua própria
+// vaga na fila — assim os 8 não se empilham no mesmo ponto.
+const DISTANCIAS_VAGA_M: Record<string, number> = {
+  '1-0': 14,
+  '1-1': 34,
+  '2-0': 54,
+  '2-1': 74,
+  '3-0': 94,
+  '3-1': 114,
+  '4-0': 134,
+  '4-1': 154,
+}
+
+// Quantos veículos circulam por linha (o 2º sai meio intervalo depois do 1º)
+const VEICULOS_POR_LINHA = [0, 1]
+
+// Vaga de um veículo: "id-veiculo" (padrão 12 m se a linha não estiver na fila)
+function vagaVeiculo(linhaId: number, veiculo: number): number {
+  return DISTANCIAS_VAGA_M[`${linhaId}-${veiculo}`] ?? 12
+}
+
+// Segunda placa do veículo: soma 1 no último caractere da placa oficial
+// (ABC-1D23 → ABC-1D24) para cada ônibus do mapa ter identificação própria
+function placaVeiculo(placa: string, veiculo: number): string {
+  if (veiculo === 0) return placa
+  const ultimo = placa.slice(-1)
+  const proximo = /[0-9]/.test(ultimo)
+    ? String((Number(ultimo) + 1) % 10)
+    : String.fromCharCode(ultimo.charCodeAt(0) + 1)
+  return placa.slice(0, -1) + proximo
 }
 
 // Coordenada do Terminal Urbano Nelson Reis Alves: origem e destino de
 // todas as rotas simuladas da apresentação
-const COORD_TERMINAL: [number, number] = [-21.203169, -50.4385078]
+export const COORD_TERMINAL: [number, number] = [-21.203169, -50.4385078]
 
 // Ponto "metros" metros à frente do início do trajeto, caminhando pela rota
 // (a vaga precisa estar NA RUA do trajeto, por isso percorre os vértices)
@@ -220,7 +245,7 @@ export default function MapaDesloca({
   const camadaAlertasRef = useRef<L.LayerGroup | null>(null)
 
   // Controle dos marcadores de ônibus
-  const marcadoresOnibusRef = useRef<Record<number, L.Marker>>({})
+  const marcadoresOnibusRef = useRef<Record<string, L.Marker>>({})
 
   // Último conjunto de rotas desenhado (serve para enquadrar o mapa só quando
   // a seleção muda, e não a cada renderização do React)
@@ -308,53 +333,59 @@ export default function MapaDesloca({
     todasLinhas.forEach((linha) => {
       if (linha.status !== 'operacao') return
 
-      const coordAtual = linha.proximoOnibus.posicao
+      VEICULOS_POR_LINHA.forEach((veiculo) => {
+        // Cada veículo espera na SUA vaga da fila (mesmo trajeto, posições distintas)
+        const vaga = pontoNoTrajeto(linha.trajeto, vagaVeiculo(linha.id, veiculo))
+        const chave = `${linha.id}-${veiculo}`
 
-      const marker = L.marker(coordAtual, {
-        icon: iconeOnibus(linha.cor),
+        const marker = L.marker(vaga, {
+          icon: iconeOnibus(linha.cor),
+        })
+
+        // Popup calculado NO MOMENTO EM QUE É ABERTO (função, não texto fixo):
+        // assim ele sempre mostra o estado atual do relógio simulado —
+        // se o ônibus está em rota ou parado, e quando sai a próxima viagem.
+        // O 2º veículo da linha sai meio intervalo depois do 1º
+        marker.bindPopup(() => {
+          const primeira = linha.partida.primeira + (linha.partida.intervalo / 2) * veiculo
+          const desde = desdeUltimaPartida(primeira, linha.partida.intervalo)
+          // Mesma duração de volta usada na animação (com a lentidão aplicada)
+          const duracaoMin = linha.duracaoVoltaMin * FATOR_LENTIDAO
+          const emRota = desde !== null && desde < duracaoMin
+          const proxima = proximaPartida(primeira, linha.partida.intervalo)
+
+          return montarPopup(
+            `<span class="popup-codigo">${linha.codigo}</span> ${linha.nome}`,
+            `
+              <div class="popup-estado ${emRota ? 'em-rota' : 'no-terminal'}">
+                ● ${emRota ? 'Em rota' : 'No Terminal (vaga)'}
+              </div>
+              <div>Placa: <b>${placaVeiculo(linha.proximoOnibus.placa, veiculo)}</b></div>
+              ${
+                emRota
+                  ? `<div>Previsão: <b>${linha.proximoOnibus.previsao}</b></div>`
+                  : `<div>Próxima partida: <b>${formatarRelogio(proxima)}</b></div>`
+              }
+              <div>Lotação: <b>${linha.proximoOnibus.lotacao}</b></div>
+              <div class="popup-nota">
+                Partidas: <b>${formatarRelogio(primeira)}</b> e
+                depois a cada <b>${linha.partida.intervalo} min</b>
+              </div>
+            `,
+            `<button class="popup-placa-botao"
+               onclick="window.__selecionarLinhaDesloca && window.__selecionarLinhaDesloca(${linha.id})">
+               Ver trajeto completo
+             </button>`
+          )
+        })
+
+        if (onLinhaClick) {
+          marker.on('click', () => onLinhaClick(linha))
+        }
+
+        marker.addTo(camadaOnibus)
+        marcadoresOnibusRef.current[chave] = marker
       })
-
-      // Popup calculado NO MOMENTO EM QUE É ABERTO (função, não texto fixo):
-      // assim ele sempre mostra o estado atual do relógio simulado —
-      // se o ônibus está em rota ou parado, e quando sai a próxima viagem
-      marker.bindPopup(() => {
-        const desde = desdeUltimaPartida(linha.partida.primeira, linha.partida.intervalo)
-        // Mesma duração de volta usada na animação (com a lentidão aplicada)
-        const duracaoMin = linha.duracaoVoltaMin * FATOR_LENTIDAO
-        const emRota = desde !== null && desde < duracaoMin
-        const proxima = proximaPartida(linha.partida.primeira, linha.partida.intervalo)
-
-        return montarPopup(
-          `<span class="popup-codigo">${linha.codigo}</span> ${linha.nome}`,
-          `
-            <div class="popup-estado ${emRota ? 'em-rota' : 'no-terminal'}">
-              ● ${emRota ? 'Em rota' : 'No Terminal (vaga)'}
-            </div>
-            <div>Placa: <b>${linha.proximoOnibus.placa}</b></div>
-            ${
-              emRota
-                ? `<div>Previsão: <b>${linha.proximoOnibus.previsao}</b></div>`
-                : `<div>Próxima partida: <b>${formatarRelogio(proxima)}</b></div>`
-            }
-            <div>Lotação: <b>${linha.proximoOnibus.lotacao}</b></div>
-            <div class="popup-nota">
-              Partidas: <b>${formatarRelogio(linha.partida.primeira)}</b> e
-              depois a cada <b>${linha.partida.intervalo} min</b>
-            </div>
-          `,
-          `<button class="popup-placa-botao"
-             onclick="window.__selecionarLinhaDesloca && window.__selecionarLinhaDesloca(${linha.id})">
-             Ver trajeto completo
-           </button>`
-        )
-      })
-
-      if (onLinhaClick) {
-        marker.on('click', () => onLinhaClick(linha))
-      }
-
-      marker.addTo(camadaOnibus)
-      marcadoresOnibusRef.current[linha.id] = marker
     })
 
     ;(window as unknown as { __selecionarLinhaDesloca?: (id: number) => void }).__selecionarLinhaDesloca = (id: number) => {
@@ -374,42 +405,51 @@ export default function MapaDesloca({
     const semMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (semMovimento) return
 
-    // Pré-calcula, para cada linha, a distância acumulada até cada vértice do
-    // trajeto — assim dá para interpolar a posição exata entre dois pontos
+    // Pré-calcula, para cada linha e cada veículo, a distância acumulada até
+    // cada vértice do trajeto — assim dá para interpolar a posição exata
+    // entre dois pontos. O 2º veículo da linha sai meio intervalo depois
     const rotas = todasLinhas
       .filter((linha) => linha.status === 'operacao' && linha.trajeto.length > 1)
-      .map((linha) => {
-        const acumulado: number[] = [0]
-        let total = 0
-        for (let i = 1; i < linha.trajeto.length; i++) {
-          total += metrosEntre(linha.trajeto[i - 1], linha.trajeto[i])
-          acumulado.push(total)
-        }
-        const duracaoSeg = linha.duracaoVoltaMin * 60 * FATOR_LENTIDAO
-        return {
-          linha,
-          acumulado,
-          total,
-          duracaoSeg,
-          // Duração da volta já com a lentidão aplicada (minutos simulados)
-          duracaoMin: linha.duracaoVoltaMin * FATOR_LENTIDAO,
-          // Vaga (fila de espera) na rua de saída, em metros do início
-          vagaMetros: DISTANCIAS_VAGA_M[linha.id] ?? 15,
-          // Onde o ônibus espera, parado: na rua do trajeto, em volta do Terminal
-          vaga: pontoNoTrajeto(linha.trajeto, DISTANCIAS_VAGA_M[linha.id] ?? 15),
-        }
-      })
+      .flatMap((linha) =>
+        VEICULOS_POR_LINHA.map((veiculo) => {
+          const acumulado: number[] = [0]
+          let total = 0
+          for (let i = 1; i < linha.trajeto.length; i++) {
+            total += metrosEntre(linha.trajeto[i - 1], linha.trajeto[i])
+            acumulado.push(total)
+          }
+          const duracaoSeg = linha.duracaoVoltaMin * 60 * FATOR_LENTIDAO
+          const metrosVaga = vagaVeiculo(linha.id, veiculo)
+          return {
+            linha,
+            veiculo,
+            // Chave do marcador deste veículo (linha + índice)
+            chave: `${linha.id}-${veiculo}`,
+            // Primeira partida deslocada (o 2º sai no meio do intervalo)
+            primeira: linha.partida.primeira + (linha.partida.intervalo / 2) * veiculo,
+            acumulado,
+            total,
+            duracaoSeg,
+            // Duração da volta já com a lentidão aplicada (minutos simulados)
+            duracaoMin: linha.duracaoVoltaMin * FATOR_LENTIDAO,
+            // Vaga (fila de espera) na rua de saída, em metros do início
+            vagaMetros: metrosVaga,
+            // Onde o ônibus espera, parado: na rua do trajeto, em volta do Terminal
+            vaga: pontoNoTrajeto(linha.trajeto, metrosVaga),
+          }
+        })
+      )
       .filter((rota) => rota.total > 0)
 
     if (!rotas.length) return
 
     const animar = () => {
       rotas.forEach((rota) => {
-        const marcador = marcadoresOnibusRef.current[rota.linha.id]
+        const marcador = marcadoresOnibusRef.current[rota.chave]
         if (!marcador) return
 
-        // Minutos desde a última partida da linha no relógio simulado
-        const desde = desdeUltimaPartida(rota.linha.partida.primeira, rota.linha.partida.intervalo)
+        // Minutos desde a última partida DESTE VEÍCULO no relógio simulado
+        const desde = desdeUltimaPartida(rota.primeira, rota.linha.partida.intervalo)
 
         // Antes da primeira viagem do dia, ou já completou a volta:
         // o ônibus aguarda na vaga do Terminal até a próxima partida

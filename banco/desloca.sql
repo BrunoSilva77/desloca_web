@@ -96,17 +96,6 @@ CREATE TABLE denuncias (
 );
 
 -- -----------------------------------------------------------------------------
--- Tabela USUARIOS: cadastro de quem usa o sistema (se houver login)
--- -----------------------------------------------------------------------------
-CREATE TABLE usuarios (
-    id          INT AUTO_INCREMENT PRIMARY KEY,
-    nome        VARCHAR(80)  NOT NULL,
-    email       VARCHAR(120) NOT NULL UNIQUE,   -- UNIQUE: e-mail não pode repetir
-    senha_hash  VARCHAR(255) NOT NULL,          -- Senha criptografada (bcrypt)
-    criado_em   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- -----------------------------------------------------------------------------
 -- DADOS DE EXEMPLO (seed) para testar o sistema sem digitar tudo na mão
 -- -----------------------------------------------------------------------------
 INSERT INTO linhas (codigo, nome, cor, tarifa, frequencia) VALUES

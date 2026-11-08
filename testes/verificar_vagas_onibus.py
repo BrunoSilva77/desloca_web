@@ -79,14 +79,14 @@ with sync_playwright() as p:
         e for e in emojis_andando if e.startswith("rotate") and e != "rotate(45deg)"
     ]
 
-    print(f"distancia das pontas ao terminal (px): {dists} (esperado 10 a 85)")
+    print(f"distancia das pontas ao terminal (px): {dists} (esperado 10 a 150)")
     print(f"separacao entre onibus (px): {separacoes} (esperado > 12)")
     print(f"emojis parados: {emojis_parados} (esperado rotate(45deg) em todos)")
     print(f"emojis girados com a rua: {len(giros_andando)}/{len(emojis_andando)}")
     print(f"erros de console: {erros if erros else 'nenhum'}")
 
-    assert len(dists) == 4, f"esperava 4 onibus, achei {len(dists)}"
-    assert all(10 < d < 85 for d in dists), f"onibus fora da fila do terminal: {dists}"
+    assert len(dists) == 8, f"esperava 8 onibus, achei {len(dists)}"
+    assert all(10 < d < 150 for d in dists), f"onibus fora da fila do terminal: {dists}"
     assert all(s > 12 for s in separacoes), f"onibus empilhados na vaga: {separacoes}"
     assert all(e == "rotate(45deg)" for e in emojis_parados), (
         f"emoji de quem espera nao esta em pe: {emojis_parados}"

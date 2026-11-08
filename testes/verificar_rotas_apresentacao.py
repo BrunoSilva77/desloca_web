@@ -31,9 +31,11 @@ JS_RELOGIO = """() =>
     (document.querySelector('.relogio-simulado b') || {}).textContent || ''
 """
 
-# Intervalo entre amostras (ms) e quantidade: 27 x 6s = 162s de observação
+# Intervalo entre amostras (ms) e quantidade: 30 x 6s = 180s de observação
+# (cobre as 4 primeiras partidas, as dos 2ºs veículos no +10 min simulado
+#  e parte das segundas voltas)
 INTERVALO_MS = 6000
-AMOSTRAS = 27
+AMOSTRAS = 30
 
 with sync_playwright() as p:
     navegador = p.chromium.launch(headless=True)
@@ -148,12 +150,12 @@ with sync_playwright() as p:
 
     print(f"tiles Esri: {tiles_esri} | http 200: {tiles_http_ok} "
           f"({len(status_tiles)} tiles) | exemplo: {tiles[:1]}")
-    print(f"onibus no mapa: {n_onibus} (esperado 4)")
+    print(f"onibus no mapa: {n_onibus} (esperado 8)")
     print(f"terminal visivel: {tem_terminal}")
     print(f"rotas desenhadas (paths SVG): {n_rotas} (esperado >= 4)")
     print(f"rotas pontilhadas: {sum(1 for d in dash_rotas if d)}/{len(dash_rotas)}")
     print(f"pontos de parada no padrao: {n_pontos_padrao} (esperado 0)")
-    print(f"onibus que ficaram parados na vaga: {total_paradas}/4")
+    print(f"onibus que ficaram parados na vaga: {total_paradas}/8")
     print(f"atraso entre a 1a e a ultima partida: {atraso_entre_partidas:.0f}s "
           f"(esperado >= 60s)")
     print(f"relogio simulado: {relogio1} -> {relogio2} (deve avancar)")
@@ -162,12 +164,12 @@ with sync_playwright() as p:
 
     assert tiles_esri, "tiles nao sao do Esri World Street Map"
     assert tiles_http_ok, f"tiles do Esri fora de 200: {status_tiles[:5]}"
-    assert n_onibus == 4, f"esperava 4 onibus, achei {n_onibus}"
+    assert n_onibus == 8, f"esperava 8 onibus, achei {n_onibus}"
     assert tem_terminal, "marcador do Terminal ausente"
     assert n_rotas >= 4, f"esperava >= 4 rotas, achei {n_rotas}"
     assert n_pontos_padrao == 0, "pontos de parada aparecem sem linha ativa"
     assert dash_rotas and all(d for d in dash_rotas), "alguma rota nao esta pontilhada"
-    assert total_paradas == 4, "nem todos os onibus aguardaram na vaga do Terminal"
+    assert total_paradas == 8, "nem todos os onibus aguardaram na vaga do Terminal"
     assert atraso_entre_partidas >= 60, (
         f"partidas muito juntas ({atraso_entre_partidas:.0f}s entre a 1a e a ultima)"
     )
@@ -199,7 +201,7 @@ with sync_playwright() as p:
     print(f"home: tiles Esri {esri_home} | onibus no hero: {onibus_home}")
     print(f"erros de console (home): {erros2 if erros2 else 'nenhum'}")
     assert esri_home, "home nao esta com tiles do Esri"
-    assert onibus_home == 4, "hero sem os 4 onibus"
+    assert onibus_home == 8, "hero sem os 8 onibus"
     assert not erros2, f"erros de console na home: {erros2}"
 
     navegador.close()

@@ -37,7 +37,9 @@
 | **Express** | Biblioteca do Node.js | Criar as rotas da API (`GET`, `POST`) que o front-end vai consumir. |
 | **WebSockets (Socket.IO)** | Comunicação em tempo real | Enviar a posição do ônibus para o mapa instantaneamente, sem precisar recarregar a página. |
 | **MySQL** | Sistema de banco de dados | Armazenar as informações permanentes: linhas, pontos, veículos, alertas e denúncias. |
-| **JWT + bcrypt** | Segurança | Autenticação de usuários: senha criptografada e token de acesso (se precisarmos de login). |
+
+> **Nota:** o protótipo **não tem login** (cortado pela equipe) — por isso não
+> usamos JWT nem bcrypt e não existe tabela de usuários no banco.
 
 ---
 
