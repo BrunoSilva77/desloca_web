@@ -35,10 +35,33 @@ function proximaPartidaLinha(linha: Linha): number {
   return proximaPartida(linha.partida.primeira, linha.partida.intervalo)
 }
 
-// A linha está com o ônibus em rota agora? (para marcar "em rota" na placa)
-function estaEmRota(linha: Linha): boolean {
-  const desde = desdeUltimaPartida(linha.partida.primeira, linha.partida.intervalo)
-  return desde !== null && desde < linha.duracaoVoltaMin
+// Quantos veículos circulam por linha (mesmo número usado na simulação do mapa:
+// o 2º veículo sai meio intervalo depois do 1º) — cada um com sua placa e seu
+// próprio horário de próxima partida, para a lista do painel mostrar OS DOIS
+const VEICULOS_LISTA = [0, 1]
+
+// Dados de um veículo específico da linha (placa própria + situação atual)
+function veiculosDaLinha(linha: Linha) {
+  return VEICULOS_LISTA.map((veiculo) => {
+    // Mesmo deslocamento de partida usado no MapaDesloca (2º sai +intervalo/2)
+    const primeira = linha.partida.primeira + (linha.partida.intervalo / 2) * veiculo
+    const desde = desdeUltimaPartida(primeira, linha.partida.intervalo)
+    const emRota = desde !== null && desde < linha.duracaoVoltaMin
+    // Segunda placa: soma 1 no último caractere (ABC-1D23 → ABC-1D24)
+    const ultimo = linha.proximoOnibus.placa.slice(-1)
+    const proximo =
+      /[0-9]/.test(ultimo)
+        ? String((Number(ultimo) + 1) % 10)
+        : String.fromCharCode(ultimo.charCodeAt(0) + 1)
+    const placa =
+      veiculo === 0 ? linha.proximoOnibus.placa : linha.proximoOnibus.placa.slice(0, -1) + proximo
+    return {
+      veiculo,
+      placa,
+      emRota,
+      proxima: proximaPartida(primeira, linha.partida.intervalo),
+    }
+  })
 }
 
 // Ícone SVG de ônibus reutilizável
@@ -81,9 +104,8 @@ export default function Mapa() {
   const [filtroStatus, setFiltroStatus] = useState<'todas' | 'operacao'>('todas')
 
   // Linhas cujos trajetos e pontos serão desenhados no mapa (vazio = modo limpo, só ônibus andando!)
-  // Por padrão TODAS as rotas aparecem (a apresentação já abre com as 4
-  // linhas desenhadas); desmarcar entra no modo limpo
-  const [linhasVisiveisIds, setLinhasVisiveisIds] = useState<number[]>(LINHAS.map((l) => l.id))
+  // Começa no modo limpo: nenhuma rota desenhada, apenas os ônibus em movimento
+  const [linhasVisiveisIds, setLinhasVisiveisIds] = useState<number[]>([])
 
   const [mostrarAlertas, setMostrarAlertas] = useState(true)
 
@@ -103,9 +125,9 @@ export default function Mapa() {
   const [alertasLista, setAlertasLista] = useState<Alerta[]>(ALERTAS)
   const [notificacoesNaoLidas, setNotificacoesNaoLidas] = useState(3)
 
-  // Localização do usuário
+  // Localização do usuário (usada no card "Ponto mais próximo" e no roteiro
+  // por destino; quando o GPS falha, simplesmente não mostra o card)
   const [minhaPosicao, setMinhaPosicao] = useState<[number, number] | null>(null)
-  const [erroLocalizacao, setErroLocalizacao] = useState(false)
 
   // Sistema de dicas e toasts
   const [dicaContextual, setDicaContextual] = useState<string | null>(null)
@@ -152,14 +174,13 @@ export default function Mapa() {
   // Geolocalização do usuário
   // ---------------------------------------------------------------------------
   useEffect(() => {
-    if (!('geolocation' in navigator)) {
-      setErroLocalizacao(true)
-      return
-    }
+    // Sem GPS disponível (ou permissão negada): apenas não mostra o card de
+    // ponto mais próximo — nenhum aviso de erro na tela
+    if (!('geolocation' in navigator)) return
 
     navigator.geolocation.getCurrentPosition(
       (pos) => setMinhaPosicao([pos.coords.latitude, pos.coords.longitude]),
-      () => setErroLocalizacao(true),
+      undefined,
       { enableHighAccuracy: true, timeout: 8000 }
     )
   }, [])
@@ -462,30 +483,9 @@ export default function Mapa() {
           </span>
         </button>
 
-        {/* Botão de alternar painel (acessível no mobile e desktop).
-            No desktop com o painel minimizado ele some: quem reabre é o
-            botão flutuante "Linhas & Horários" — duplicar "Abrir Linhas"
-            só polui a barra */}
-        {!(painelMinimizadoDesktop && window.innerWidth > 860) && (
-          <button
-            type="button"
-            className="botao-flutuante botao-toggle-painel"
-            onClick={() => {
-              if (window.innerWidth <= 860) {
-                setPainelAbertoMobile((prev) => !prev)
-              } else {
-                setPainelMinimizadoDesktop((prev) => !prev)
-              }
-            }}
-            aria-label="Alternar exibição do painel de linhas"
-            title="Abrir ou ocultar painel de linhas"
-          >
-            <span className="icone" aria-hidden="true">
-              🚌
-            </span>
-            <span className="texto-toggle">Linhas</span>
-          </button>
-        )}
+        {/* Botão "Linhas" REMOVIDO da barra: no desktop quem reabre o painel
+            minimizado é o "◀ Linhas & Horários" e no mobile a barra de arrasto
+            (painel-touch-handle) do bottom sheet */}
       </div>
 
       {/* -------------------------------------------------------------------------
@@ -509,6 +509,7 @@ export default function Mapa() {
 
       {/* -------------------------------------------------------------------------
           CARD DO PONTO MAIS PRÓXIMO (Canto inferior esquerdo)
+          Sem GPS não há card nenhum (o aviso "Localização indisponível" foi removido)
       ------------------------------------------------------------------------- */}
       {pontoMaisProximo ? (
         <aside
@@ -532,16 +533,6 @@ export default function Mapa() {
                 Também: {ponto.nome} ({formatarDistancia(ponto.distancia)})
               </p>
             ))}
-          </div>
-        </aside>
-      ) : erroLocalizacao ? (
-        <aside className="aviso-proximo aviso-erro" role="status">
-          <span className="aviso-icone" aria-hidden="true">
-            ℹ️
-          </span>
-          <div>
-            <strong>Localização indisponível</strong>
-            <p>Ative a permissão de GPS para ver pontos próximos a você.</p>
           </div>
         </aside>
       ) : null}
@@ -919,15 +910,22 @@ export default function Mapa() {
                         </div>
                       </div>
 
-                      {/* Próxima partida (coluna de horários, números tabulares) */}
+                      {/* Próximas partidas: OS DOIS veículos da linha, cada um
+                          com sua placa e seu horário (o 2º sai +intervalo/2) */}
                       {linha.status === 'operacao' ? (
                         <div className="linha-partida">
-                          <small>{estaEmRota(linha) ? 'situação' : 'próxima'}</small>
-                          <strong className={estaEmRota(linha) ? 'em-rota' : ''}>
-                            {estaEmRota(linha)
-                              ? 'em rota'
-                              : formatarRelogio(proximaPartidaLinha(linha))}
-                          </strong>
+                          <small>{veiculosDaLinha(linha).some((v) => v.emRota) ? 'situação' : 'próximas'}</small>
+                          {veiculosDaLinha(linha).map((veiculo) => (
+                            <span key={veiculo.veiculo} className="linha-veiculo">
+                              <small className="placa-veiculo">{veiculo.placa}</small>
+                              <strong
+                                className={veiculo.emRota ? 'em-rota' : ''}
+                                title={`Próxima partida do veículo ${veiculo.placa}`}
+                              >
+                                {veiculo.emRota ? 'em rota' : formatarRelogio(veiculo.proxima)}
+                              </strong>
+                            </span>
+                          ))}
                         </div>
                       ) : (
                         <span className="fora-de-linha">Fora de operação</span>

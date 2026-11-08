@@ -627,12 +627,6 @@ input:focus-visible {
   color: rgba(250, 248, 244, 0.55);
 }
 
-/* Versão de erro: localização não permitida (fio vermelho sobre a tinta) */
-.aviso-proximo.aviso-erro {
-  background: rgba(46, 24, 22, 0.96);
-  border-color: rgba(179, 69, 58, 0.65);
-}
-
 /* Linha divisória dentro do painel: fio tenue, sem margem larga */
 .divisor {
   border: none;
@@ -2115,10 +2109,6 @@ textarea.campo {
   padding: 0;
 }
 
-.botao-flutuante.botao-toggle-painel {
-  display: inline-flex;
-}
-
 /* Botão flutuante para restaurar o painel quando minimizado no Desktop */
 .botao-restaurar-painel {
   position: absolute;
@@ -2611,6 +2601,7 @@ textarea.campo {
   flex-direction: column;
   align-items: flex-end;
   min-width: 74px;
+  gap: 2px;
 }
 
 .linha-partida small {
@@ -2625,6 +2616,20 @@ textarea.campo {
   color: var(--preto);
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.01em;
+}
+
+/* Uma linha por veículo da lista: placa (micro) + horário da próxima partida */
+.linha-veiculo {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.linha-veiculo .placa-veiculo {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #8f887f;
+  letter-spacing: 0.02em;
 }
 
 /* Ônibus circulando agora: horário vira "em rota" em âmbar */
@@ -3471,11 +3476,6 @@ textarea.campo {
     height: 42px;
     padding: 0 12px;
     font-size: 0.82rem;
-  }
-
-  .botao-flutuante.botao-toggle-painel {
-    display: inline-flex;
-    margin-left: auto;
   }
 
   .botao-restaurar-painel {

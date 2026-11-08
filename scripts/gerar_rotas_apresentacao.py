@@ -93,6 +93,59 @@ ROTAS_APRESENTACAO = {
         ("Aeroporto de Araçatuba", [-21.140815, -50.4251391]),
         ("Terminal Urbano", TERMINAL),
     ],
+    # NORDESTE: Eng. Taveira, loteamentos distantes e zona rural urbanizada
+    "505": [
+        ("Terminal Urbano", TERMINAL),
+        ("Jardim Brasil", [-21.1986335, -50.4548515]),
+        ("Boa Vista", [-21.1955379, -50.4581962]),
+        ("Jardim Presidente", [-21.1961563, -50.462858]),
+        ("São Rafael", [-21.1698568, -50.4561647]),
+        ("Conj. Manoel Pires", [-21.1753784, -50.4552068]),
+        ("Verde Parque", [-21.1688741, -50.4689268]),
+        ("Engenheiro Taveira", [-21.1507421, -50.5025071]),
+        ("Residencial Aimoré", [-21.1576987, -50.4895675]),
+        ("Residencial Águas Claras", [-21.1699658, -50.4709673]),
+        ("Terminal Urbano", TERMINAL),
+    ],
+    # LESTE-SUDESTE: corredor educacional e hospitalar, Vila Mendonça
+    "606": [
+        ("Terminal Urbano", TERMINAL),
+        ("Vila Mendonça", [-21.2070534, -50.4351375]),
+        ("Teatro Castro Alves", [-21.206008, -50.4417118]),
+        ("Avenida dos Araçás", [-21.2024012, -50.4307352]),
+        ("Água Branca", [-21.2086069, -50.3979255]),
+        ("Hospital Unimed", [-21.2299234, -50.4157484]),
+        ("Unesp FOA", [-21.2511175, -50.4205161]),
+        ("Avenida Brasília", [-21.2372456, -50.4391301]),
+        ("Higienópolis", [-21.2139139, -50.448644]),
+        ("Terminal Urbano", TERMINAL),
+    ],
+    # SUDOESTE: Shopping, chacaras, residenciais da zona sudoeste
+    "707": [
+        ("Terminal Urbano", TERMINAL),
+        ("Vila Nova", [-21.2106256, -50.4584211]),
+        ("Shopping Araçatuba", [-21.211808, -50.4698304]),
+        ("Chácaras Califórnia", [-21.216732, -50.4815419]),
+        ("Residencial Beatriz", [-21.2012374, -50.4808852]),
+        ("Conj. Mãe Divina", [-21.1939405, -50.4802952]),
+        ("São José", [-21.1951075, -50.4792008]),
+        ("Porto Real II", [-21.191059, -50.4748018]),
+        ("Lago Azul", [-21.2360547, -50.4598228]),
+        ("Saudade", [-21.2248896, -50.443607]),
+        ("Terminal Urbano", TERMINAL),
+    ],
+    # EXPRESSO: ligacao rapida centro-aeroporto via zoo e corredor norte
+    "808": [
+        ("Terminal Urbano", TERMINAL),
+        ("Praça do Relógio", [-21.203668, -50.4388623]),
+        ("Centro Cultural Ferroviário", [-21.2012436, -50.4381535]),
+        ("Havan", [-21.202375, -50.4388966]),
+        ("Zoológico Municipal", [-21.1927439, -50.4434665]),
+        ("Dona Amélia", [-21.1897831, -50.4434352]),
+        ("Ipanema", [-21.1827411, -50.4446573]),
+        ("Aeroporto de Araçatuba", [-21.140815, -50.4251391]),
+        ("Terminal Urbano", TERMINAL),
+    ],
 }
 
 
@@ -180,7 +233,7 @@ def main():
         json.dump(trajetos, arquivo, ensure_ascii=False)
 
     total = sum(t["distancia_km"] for t in trajetos.values())
-    print(f"\nOK: 4 rotas, {total} km no total, salvo em src/dados/trajetos.json")
+    print(f"\nOK: {len(trajetos)} rotas, {total} km no total, salvo em src/dados/trajetos.json")
 
 
 if __name__ == "__main__":
