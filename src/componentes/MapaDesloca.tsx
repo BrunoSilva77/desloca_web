@@ -161,6 +161,18 @@ function girarEmoji(marcador: L.Marker, grausVisiveis: number) {
   if (emoji) emoji.style.transform = `rotate(${grausVisiveis}deg)`
 }
 
+// Popup no idioma visual da "placa de partidas": faixa de tinta em cima com o
+// título, corpo em papel embaixo — o CSS global cuida do resto
+function montarPopup(titulo: string, corpo: string, extra = ''): string {
+  return `
+    <div class="popup-placa">
+      <div class="popup-placa-cabecalho">${titulo}</div>
+      <div class="popup-placa-corpo">${corpo}</div>
+      ${extra}
+    </div>
+  `
+}
+
 function iconeUsuario() {
   return L.divIcon({
     className: '',
@@ -258,13 +270,11 @@ export default function MapaDesloca({
     // ponto de partida e chegada de todas as linhas (simulação da apresentação)
     L.marker(COORD_TERMINAL, { icon: iconeTerminal(), zIndexOffset: 600 })
       .bindPopup(
-        `
-        <div style="font-family: 'Manrope', sans-serif; font-size: 13px; line-height: 1.4;">
-          <strong style="font-size: 14px; display: block; margin-bottom: 2px;">🚉 Terminal Urbano</strong>
-          <span style="color: #6B6863;">Nelson Reis Alves</span><br>
-          <span style="color: #6B6863;">Todos os ônibus saem e voltam aqui.</span>
-        </div>
-      `
+        montarPopup(
+          '🚉 Terminal Urbano',
+          `<strong>Nelson Reis Alves</strong><br>
+           Todos os ônibus saem e voltam aqui.`
+        )
       )
       .addTo(mapa)
 
@@ -314,23 +324,29 @@ export default function MapaDesloca({
         const emRota = desde !== null && desde < duracaoMin
         const proxima = proximaPartida(linha.partida.primeira, linha.partida.intervalo)
 
-        return `
-        <div style="font-family: 'Manrope', sans-serif; font-size: 13px; line-height: 1.45;">
-          <strong style="display: block; font-size: 14px; margin-bottom: 3px;">🚌 Linha ${linha.codigo} — ${linha.nome}</strong>
-          <div style="color: ${emRota ? '#4F7A5A' : '#B08A57'}; font-weight: 700; margin-bottom: 4px;">● ${emRota ? 'Em rota' : 'No Terminal (vaga)'}</div>
-          <div>Placa: <b>${linha.proximoOnibus.placa}</b></div>
-          ${
-            emRota
-              ? `<div>Previsão: <b>${linha.proximoOnibus.previsao}</b></div>`
-              : `<div>Próxima partida: <b>${formatarRelogio(proxima)}</b></div>`
-          }
-          <div>Lotação: <b>${linha.proximoOnibus.lotacao}</b></div>
-          <div style="margin-top: 4px; color: #6B6863;">Partidas: <b>${formatarRelogio(linha.partida.primeira)}</b> e depois a cada <b>${linha.partida.intervalo} min</b></div>
-          <button style="margin-top: 8px; width: 100%; padding: 6px 10px; background: #1D1D1B; color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;" onclick="window.__selecionarLinhaDesloca && window.__selecionarLinhaDesloca(${linha.id})">
-            Ver trajeto completo
-          </button>
-        </div>
-      `
+        return montarPopup(
+          `<span class="popup-codigo">${linha.codigo}</span> ${linha.nome}`,
+          `
+            <div class="popup-estado ${emRota ? 'em-rota' : 'no-terminal'}">
+              ● ${emRota ? 'Em rota' : 'No Terminal (vaga)'}
+            </div>
+            <div>Placa: <b>${linha.proximoOnibus.placa}</b></div>
+            ${
+              emRota
+                ? `<div>Previsão: <b>${linha.proximoOnibus.previsao}</b></div>`
+                : `<div>Próxima partida: <b>${formatarRelogio(proxima)}</b></div>`
+            }
+            <div>Lotação: <b>${linha.proximoOnibus.lotacao}</b></div>
+            <div class="popup-nota">
+              Partidas: <b>${formatarRelogio(linha.partida.primeira)}</b> e
+              depois a cada <b>${linha.partida.intervalo} min</b>
+            </div>
+          `,
+          `<button class="popup-placa-botao"
+             onclick="window.__selecionarLinhaDesloca && window.__selecionarLinhaDesloca(${linha.id})">
+             Ver trajeto completo
+           </button>`
+        )
       })
 
       if (onLinhaClick) {
@@ -481,13 +497,11 @@ export default function MapaDesloca({
             icon: iconePonto(ativa),
           })
 
-          const popupContent = `
-            <div style="font-family: 'Manrope', sans-serif; font-size: 13px; line-height: 1.4;">
-              <strong style="font-size: 14px; display: block; margin-bottom: 2px;">🚏 ${ponto.nome}</strong>
-              <span style="color: #6B6863;">Linha: <b>${linha.codigo} — ${linha.nome}</b></span><br>
-              <span style="color: #6B6863;">Tarifa: ${linha.tarifa}</span>
-            </div>
-          `
+          const popupContent = montarPopup(
+            `🚏 ${ponto.nome}`,
+            `<div class="popup-estado em-rota">Linha <b>${linha.codigo}</b> — ${linha.nome}</div>
+             <div>Tarifa: <b>${linha.tarifa}</b></div>`
+          )
           marker.bindPopup(popupContent)
 
           if (onPontoClick) {
@@ -529,13 +543,13 @@ export default function MapaDesloca({
         icon: iconeAlerta(alerta.tipo),
       })
 
-      marker.bindPopup(`
-        <div style="font-family: 'Manrope', sans-serif; font-size: 13px; line-height: 1.4;">
-          <strong style="color: #B3453A; font-size: 14px; display: block; margin-bottom: 2px;">⚠️ Alerta / Ocorrência</strong>
-          <div><b>${alerta.titulo}</b></div>
-          ${alerta.descricao ? `<p style="margin-top: 4px; color: #6B6863;">${alerta.descricao}</p>` : ''}
-        </div>
-      `)
+      marker.bindPopup(
+        montarPopup(
+          `<span class="popup-codigo popup-codigo-alerta">⚠️</span> Alerta / Ocorrência`,
+          `<div class="popup-estado alerta"><b>${alerta.titulo}</b></div>
+           ${alerta.descricao ? `<div class="popup-nota">${alerta.descricao}</div>` : ''}`
+        )
+      )
 
       if (onAlertaClick) {
         marker.on('click', () => onAlertaClick(alerta))
@@ -546,11 +560,7 @@ export default function MapaDesloca({
 
     if (minhaPosicao) {
       L.marker(minhaPosicao, { icon: iconeUsuario() })
-        .bindPopup(`
-          <div style="font-family: 'Manrope', sans-serif; font-size: 13px;">
-            <b>📍 Você está aqui</b>
-          </div>
-        `)
+        .bindPopup(montarPopup('📍 Você está aqui', '<div>Sua localização aproximada.</div>'))
         .addTo(camadaAlertas)
     }
   }, [alertasCoords, minhaPosicao, onAlertaClick])

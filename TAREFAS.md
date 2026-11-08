@@ -106,6 +106,18 @@ git push
       via. Playwright: vagas 33–81 m do terminal em pontos distintos do
       trajeto, emojis girando com a rua, 0 erros (`verificar_vagas_onibus.py`,
       `conferir_vagas_latlng.py`)
+- [x] **06/11** — **Redesign "Placa de partidas" no mapa** (skill
+      `frontend-design`): chrome de tinta #1D1D1B flutuando sobre o mapa claro
+      com detalhes em bege #C9A882 — placa de partidas no topo (relógio +
+      horário de saída de cada linha em números tabulares), placas quadradas
+      com o código das linhas, painel com cabeçalho de tinta e lista em linhas
+      de fio (sem cards arredondados), faixa de tinta com o próximo veículo e
+      a próxima partida no detalhe, popups do Leaflet na mesma família (faixa
+      de tinta + corpo em papel) e bottom sheet mobile com cantos curtos.
+      Botão "Abrir Linhas" removido da barra no desktop minimizado (quem
+      reabre é o "◀ Linhas & Horários"). Capturas em `capturar_desenho.py`
+      (desktop, detalhe, popup, mobile); `npm run build` sem erros e suíte de
+      apresentação completa verde
 
 ---
 

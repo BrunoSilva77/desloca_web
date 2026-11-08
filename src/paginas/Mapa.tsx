@@ -20,7 +20,18 @@ import DicaNotificacao from '../componentes/DicaNotificacao'
 import Toast from '../componentes/Toast'
 import { LINHAS, ALERTAS, type Linha, type Alerta } from '../dados/linhas'
 import { distanciaKm, tempoCaminhadaMin, formatarDistancia } from '../utilidades/geo'
-import { formatarRelogio } from '../utilidades/relogioSimulado'
+import { formatarRelogio, proximaPartida, desdeUltimaPartida } from '../utilidades/relogioSimulado'
+
+// Próxima partida de uma linha no relógio simulado (para a placa de partidas)
+function proximaPartidaLinha(linha: Linha): number {
+  return proximaPartida(linha.partida.primeira, linha.partida.intervalo)
+}
+
+// A linha está com o ônibus em rota agora? (para marcar "em rota" na placa)
+function estaEmRota(linha: Linha): boolean {
+  const desde = desdeUltimaPartida(linha.partida.primeira, linha.partida.intervalo)
+  return desde !== null && desde < linha.duracaoVoltaMin
+}
 
 // Ícone SVG de ônibus reutilizável
 function IconeOnibus({ cor }: { cor: string }) {
@@ -353,11 +364,28 @@ export default function Mapa() {
           BARRA DE AÇÕES FLUTUANTES (Top bar sobre o mapa)
       ------------------------------------------------------------------------- */}
       <div className="acoes-flutuantes-mapa" role="toolbar" aria-label="Ações do mapa">
-        {/* Relógio da simulação (corre 10x mais rápido que o real): mostra o
-            horário das partidas dos ônibus no mapa */}
-        <span className="relogio-simulado" aria-label="Horário da simulação">
-          🕐 <b>{horaSimulada}</b>
-        </span>
+        {/* Placa de partidas: relógio simulado + horário de saída de cada linha.
+            O relógio corre 10x mais rápido que o real e as chips recalculam a
+            cada segundo junto com ele */}
+        <div className="placa-partidas" aria-label="Placa de partidas simulada">
+          <span className="relogio-simulado" aria-label="Horário da simulação">
+            🕐 <b>{horaSimulada}</b>
+          </span>
+          <span className="placa-separador" aria-hidden="true" />
+          <div className="placa-chips">
+            {LINHAS.filter((linha) => linha.status === 'operacao').map((linha) => (
+              <span
+                key={linha.id}
+                className={`partida-chip ${estaEmRota(linha) ? 'em-rota' : ''}`}
+              >
+                <b>{linha.codigo}</b>
+                <span className="partida-valor">
+                  {estaEmRota(linha) ? 'em rota' : formatarRelogio(proximaPartidaLinha(linha))}
+                </span>
+              </span>
+            ))}
+          </div>
+        </div>
 
         {/* Sino de Notificações com badge de novidades */}
         <button
@@ -404,27 +432,30 @@ export default function Mapa() {
           </span>
         </button>
 
-        {/* Botão de alternar painel (acessível no mobile e desktop) */}
-        <button
-          type="button"
-          className="botao-flutuante botao-toggle-painel"
-          onClick={() => {
-            if (window.innerWidth <= 860) {
-              setPainelAbertoMobile((prev) => !prev)
-            } else {
-              setPainelMinimizadoDesktop((prev) => !prev)
-            }
-          }}
-          aria-label="Alternar exibição do painel de linhas"
-          title="Abrir ou ocultar painel de linhas"
-        >
-          <span className="icone" aria-hidden="true">
-            🚌
-          </span>
-          <span className="texto-toggle">
-            {painelMinimizadoDesktop ? 'Abrir Linhas' : 'Linhas'}
-          </span>
-        </button>
+        {/* Botão de alternar painel (acessível no mobile e desktop).
+            No desktop com o painel minimizado ele some: quem reabre é o
+            botão flutuante "Linhas & Horários" — duplicar "Abrir Linhas"
+            só polui a barra */}
+        {!(painelMinimizadoDesktop && window.innerWidth > 860) && (
+          <button
+            type="button"
+            className="botao-flutuante botao-toggle-painel"
+            onClick={() => {
+              if (window.innerWidth <= 860) {
+                setPainelAbertoMobile((prev) => !prev)
+              } else {
+                setPainelMinimizadoDesktop((prev) => !prev)
+              }
+            }}
+            aria-label="Alternar exibição do painel de linhas"
+            title="Abrir ou ocultar painel de linhas"
+          >
+            <span className="icone" aria-hidden="true">
+              🚌
+            </span>
+            <span className="texto-toggle">Linhas</span>
+          </button>
+        )}
       </div>
 
       {/* -------------------------------------------------------------------------
@@ -529,11 +560,14 @@ export default function Mapa() {
             </div>
 
             <div className="detalhe-linha-titulo-bloco">
-              <span className="barra-cor-linha" style={{ background: linhaSelecionada.cor }} />
+              <span
+                className="badge-codigo badge-codigo-grande"
+                style={{ '--cor-linha': linhaSelecionada.cor } as React.CSSProperties}
+              >
+                {linhaSelecionada.codigo}
+              </span>
               <div>
-                <h2>
-                  {linhaSelecionada.codigo} — {linhaSelecionada.nome}
-                </h2>
+                <h2>{linhaSelecionada.nome}</h2>
                 <span className={`badge ${linhaSelecionada.status}`}>
                   {linhaSelecionada.status === 'operacao' ? 'Em operação normal' : 'Fora de linha'}
                 </span>
@@ -570,6 +604,10 @@ export default function Mapa() {
                   <div>
                     <strong>Próximo veículo: Placa {linhaSelecionada.proximoOnibus.placa}</strong>
                     <p>Previsão estimada: <b>{linhaSelecionada.proximoOnibus.previsao}</b></p>
+                  </div>
+                  <div className="partida-destaque">
+                    <small>próxima partida</small>
+                    <b>{formatarRelogio(proximaPartidaLinha(linhaSelecionada))}</b>
                   </div>
                 </div>
                 <div className="lotacao-status-barra">
@@ -751,33 +789,41 @@ export default function Mapa() {
                       </button>
 
                       {/* Ícone com cor oficial da linha */}
-                      <span className="icone-linha-box" style={{ background: `${linha.cor}18` }}>
-                        <IconeOnibus cor={linha.cor} />
+                      <span
+                        className="badge-codigo"
+                        style={{ '--cor-linha': linha.cor } as React.CSSProperties}
+                      >
+                        {linha.codigo}
                       </span>
 
                       {/* Texto descritivo da linha */}
                       <div className="linha-info-bloco">
                         <div className="linha-nome-linha">
-                          <strong>{linha.codigo} — {linha.nome}</strong>
+                          <strong>{linha.nome}</strong>
                         </div>
                         <div className="linha-subinfo">
                           <span>{linha.tarifa}</span> ·{' '}
                           <span>{linha.frequencia}</span>
                         </div>
-                        <div className="linha-status-tempo">
-                          {linha.status === 'operacao' ? (
-                            <span className="tempo-onibus">
-                              🚌 Próximo em <b>{linha.proximoOnibus.previsao}</b>
-                            </span>
-                          ) : (
-                            <span className="fora-de-linha">Fora de operação</span>
-                          )}
-                        </div>
                       </div>
+
+                      {/* Próxima partida (coluna de horários, números tabulares) */}
+                      {linha.status === 'operacao' ? (
+                        <div className="linha-partida">
+                          <small>{estaEmRota(linha) ? 'situação' : 'próxima'}</small>
+                          <strong className={estaEmRota(linha) ? 'em-rota' : ''}>
+                            {estaEmRota(linha)
+                              ? 'em rota'
+                              : formatarRelogio(proximaPartidaLinha(linha))}
+                          </strong>
+                        </div>
+                      ) : (
+                        <span className="fora-de-linha">Fora de operação</span>
+                      )}
 
                       {/* Botão de seta para detalhes */}
                       <span className="seta-detalhes" aria-hidden="true">
-                        →
+                        ›
                       </span>
                     </div>
                   </li>
