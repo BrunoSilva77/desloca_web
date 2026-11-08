@@ -503,9 +503,19 @@ export default function Mapa() {
           </span>
         </button>
 
-        {/* Botão "Linhas" REMOVIDO da barra: no desktop quem reabre o painel
-            minimizado é o "◀ Linhas & Horários" e no mobile a barra de arrasto
-            (painel-touch-handle) do bottom sheet */}
+        {/* No mobile, este botão continua visível quando o bottom sheet está fechado. */}
+        {!painelAbertoMobile && (
+          <button
+            type="button"
+            className="botao-flutuante botao-abrir-linhas-mobile"
+            onClick={() => setPainelAbertoMobile(true)}
+            aria-label="Abrir lista de linhas"
+            title="Abrir lista de linhas"
+          >
+            <span aria-hidden="true">☰</span>
+            <span>Linhas</span>
+          </button>
+        )}
       </div>
 
       {/* -------------------------------------------------------------------------
